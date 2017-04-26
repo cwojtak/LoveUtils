@@ -1,5 +1,5 @@
 --object_helper.lua
---v0.9.1
+--v1.0.0
 --Author: Connor Wojtak
 --Purpose: A utility to load objects, their attributes, and their sprites, and turn them into lists
 --containing those attributes. This file also contains functions for reading the Object lists.
@@ -71,7 +71,7 @@ end
 function create_object_para(data) 
 	local decoded_data = json.decode(data)
 	
-	return decoded_data["name"], love.graphics.newImage("sprites/" .. decoded_data["image"] .. ".jpg"), decoded_data["special"], decoded_data["flags"]
+	return decoded_data["name"], love.graphics.newImage("sprites/" .. decoded_data["image"] .. ".jpg"), decoded_data["special"], decoded_data["flags"], decoded_data["min_effect"], decoded_data["max_effect"]
 end
 
 --OBJECT CLASS
@@ -79,17 +79,17 @@ end
 function Object.start()
 	local objects = find_objects()
 	for i, obj in ipairs(objects) do
-		local name, image, special, flags = create_object_para(obj)
-		local object = Object.new(name, image, special, flags)
+		local name, image, special, flags, min_effect, max_effect = create_object_para(obj)
+		local object = Object.new(name, image, special, flags, min_effect, max_effect)
 		table.insert(GLOBAL_OBJECT_LIST, object)
 	end
 end
 
 --Creates a new Object list, which will eventually be stored in a global list. Returns: List
-function Object.new(inname, inimage, inspecial, inflags)
+function Object.new(inname, inimage, inspecial, inflags, minffect, maxffect)
 	table.insert(Object, inname)
 	local inid = Object.getIDByName(inname)
-	return {name = inname, image = inimage, special = inspecial, flags = inflags, id = inid, special = inspecial, flags = inflags}
+	return {name = inname, image = inimage, special = inspecial, flags = inflags, id = inid, special = inspecial, flags = inflags, mineffect = minffect, maxeffect = maxffect}
 end
 
 --Finds the ID of an object with the object's name based on where it is stored in the Object list. Returns: Integer or Nil
@@ -131,14 +131,12 @@ end
 function EntityObject.new(obj, begposx, begposy, begspeed, begdir)
 	table.insert(EntityObject, obj)
 	table.insert(GLOBAL_ENTITYOBJECT_LIST, {object = obj, begposx = begposx, begposy = begposy, speed = begspeed, direction = begdir, posx = begposx, posy = begposy})
-	a = GLOBAL_ENTITYOBJECT_LIST[1]
 	local ID = getTableLength(GLOBAL_ENTITYOBJECT_LIST)
 	
 	local obj_special = Object.getAttribute("special", obj)
 	if obj_special ~= nil or obj_special ~= "" then
-		EntityEffect.new(GLOBAL_EFFECT_LIST[Effect.getIDByName("red_effect")], begposx, begposy, 1)
+		EntityEffect.new(GLOBAL_EFFECT_LIST[Effect.getIDByName(obj_special)], begposx, begposy, 1, obj["mineffect"], obj["maxeffect"], ID)
 	end
-	
 	return {object = object, posx = begposx, posy = begposy, speed = begspeed, direction = begdir, posx = begposx, posy = begposy}, ID
 end
 

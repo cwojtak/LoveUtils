@@ -1,5 +1,5 @@
 --effect_helper.lua
---v0.9.1
+--v1.0.0
 --Author: Connor Wojtak
 --Purpose: A utility to add animated effects to an object.
 
@@ -19,6 +19,9 @@ EntityEffect = {}
 GLOBAL_EFFECT_LIST = {}
 GLOBAL_ENTITYEFFECT_LIST = {}
 GLOBAL_ENTITYEFFECT_INDEX = 0
+
+--Random
+math.randomseed(os.time())
 
 --Finds and reads all of the JSON files under the "effects/" folder. Returns: List
 function find_effects()
@@ -104,25 +107,42 @@ end
 
 --ENTITYEFFECT CLASS
 --Creates a new EntityEffect list. Returns: List, Integer
-function EntityEffect.new(eff, inposx, inposy, startimg)
+function EntityEffect.new(eff, inposx, inposy, startimg, mineffect, maxeffect, EID)
+	local rand = math.random(mineffect, maxeffect)
 	table.insert(EntityEffect, eff)
-	table.insert(GLOBAL_ENTITYEFFECT_LIST, {name = eff["name"], image1 = eff["image1"], image2 = eff["image2"], image3 = eff["image3"], posx = inposx, posy = inposy, imgstate = startimg})
+	table.insert(GLOBAL_ENTITYEFFECT_LIST, {name = eff["name"], image1 = eff["image1"], image2 = eff["image2"], image3 = eff["image3"], posx = inposx, posy = inposy, imgstate = startimg, am_effect = rand, ent_id =  EID})
 	local ID = getTableLength(GLOBAL_ENTITYEFFECT_LIST)
-	return {name = eff["name"], image1 = eff["image1"], image2 = eff["image2"], image3 = eff["image3"], posx = inposx, posy = inposy, imgstate = startimg}, ID
+	return {name = eff["name"], image1 = eff["image1"], image2 = eff["image2"], image3 = eff["image3"], posx = inposx, posy = inposy, imgstate = startimg, am_effect = rand, ent_id =  EID}, ID
 end
 
 --Called by love.draw() to update the effects. Returns: Nothing
 function EntityEffect.updateEffects()
 	for i, eff in ipairs(GLOBAL_ENTITYEFFECT_LIST) do
+		local entity_id = eff["ent_id"]
+		local entity_object = GLOBAL_ENTITYOBJECT_LIST[entity_id]
+		if entity_object == nil then table.remove(GLOBAL_ENTITYEFFECT_LIST, i) return end -- Used when EntityObject is deleted.
+		local entityposx = entity_object["posx"]
+		local entityposy = entity_object["posy"]
+
+		local i = 0
 		if eff["imgstate"] == 4 then eff["imgstate"] = 1 end
 		if eff["imgstate"] == 1 then
-			love.graphics.draw(eff["image1"], eff["posx"], eff["posy"], 0, 0.5, 0.5, 0, 0, 0, 0)
+			while(i ~= eff["am_effect"]) do
+				love.graphics.draw(eff["image1"], entityposx + math.random(0, 60), entityposy + math.random(0, 60), 0, 0.2, 0.2, 0, 0, 0, 0)
+				i = i + 1
+			end
 		end
 		if eff["imgstate"] == 2 then
-			love.graphics.draw(eff["image2"], eff["posx"], eff["posy"], 0, 0.5, 0.5, 0, 0, 0, 0)
+			while(i ~= eff["am_effect"]) do
+				love.graphics.draw(eff["image2"], entityposx + math.random(0, 60), entityposy + math.random(0, 60), 0, 0.2, 0.2, 0, 0, 0, 0)
+				i = i + 1
+			end
 		end
 		if eff["imgstate"] == 3 then
-			love.graphics.draw(eff["image3"], eff["posx"], eff["posy"], 0, 0.5, 0.5, 0, 0, 0, 0)
+			while(i ~= eff["am_effect"]) do
+				love.graphics.draw(eff["image3"], entityposx + math.random(0, 60), entityposy + math.random(0, 60), 0, 0.2, 0.2, 0, 0, 0, 0)
+				i = i + 1
+			end
 		end
 		if GLOBAL_ENTITYEFFECT_INDEX >= 75 then
 			eff["imgstate"] = eff["imgstate"] + 1

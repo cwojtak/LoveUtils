@@ -1,5 +1,5 @@
 --utils.lua
---v0.9.1
+--v1.0.0
 --Author: Connor Wojtak
 --Purpose: This utility provides a variety of different functions not relating to a certain class.
 

@@ -1,5 +1,5 @@
 --main.lua
---v0.9.1
+--v1.0.0
 --Author: Connor Wojtak
 --Purpose: This file tests the utilities.
 
@@ -26,7 +26,7 @@ function love.load()
 	Level.newLevel(GLOBAL_LEVEL_LIST[Level.getIDByName("main_menu")])
 	
 	--Creates a kitteh object.
-	kitteh, kittehid = EntityObject.new(GLOBAL_OBJECT_LIST[Object.getIDByName("kitty")], 256, 256, 0, "up")
+	kitteh, kittehid = EntityObject.new(GLOBAL_OBJECT_LIST[Object.getIDByName("kitty")], 256, 256, 5, "up")
 end
 
 function love.update(dt)
@@ -37,7 +37,7 @@ function love.draw()
 	Level.updateBackground()
 	EntityObject.updateObjects()
 	EntityEffect.updateEffects()
-	collectgarbage()
+	collectgarbage() -- Saves delicious memory from being eaten.
 end
 
 function love.mousepressed(x, y, button, istouch)

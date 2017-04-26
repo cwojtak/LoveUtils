@@ -1,5 +1,5 @@
 --sound_helper.lua
---v0.9.1
+--v1.0.0
 --Author: Connor Wojtak
 --Purpose: A utility used for playing and stopping sounds.
 
@@ -46,4 +46,4 @@ end
 --Finds the name of an sound with the sound's ID based on where it is stored in the Sound list. Returns: String or Nil
 function Sound.getNameByID(soundID)
 	return Sound[soundID]
-end
+ends

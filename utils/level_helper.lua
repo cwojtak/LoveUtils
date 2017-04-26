@@ -1,4 +1,5 @@
 --level_helper.lua
+--v0.9.1
 --Author: Connor Wojtak
 --Purpose: A utility to load levels, their attributes, and their backgrounds, and turn them into
 --lists containing those attributes. This file also contains functions for reading the Level lists.
@@ -10,6 +11,7 @@ OBJECT_HELPER = require("utils/object_helper")
 
 --Global Variables
 GLOBAL_LEVEL_LIST = {}
+GLOBAL_LEVEL_INDEX = 0
 
 --Directory
 WORKING_DIRECTORY = love.filesystem.getRealDirectory("objects/computer.json")
@@ -21,6 +23,7 @@ Level = {}
 --Global Variables
 LAST_LEVEL = nil
 UPDATE_BACKGROUND = false
+WINDOW_WIDTHB, WINDOW_HEIGHTB = love.window.getDesktopDimensions(1)
 
 --Finds and reads all of the JSON files under the "levels/" folder. Returns: List
 function find_levels()
@@ -40,13 +43,23 @@ function find_levels()
 	return returnList
 end
 
---Decodes JSON data and makes the image parameter from JSON file into a LOVE image. Returns: String, LOVE Image
+--Decodes JSON data returns the parameters. Returns: String, LOVE Image
 function create_level_para(data) 
 	local decoded_data = json.decode(data)
 	return decoded_data["name"], decoded_data["music"], decoded_data["background"]
 end
 
 --LEVEL CLASS
+--Called on startup. Returns: Nothing
+function Level.start()
+	local levels = find_levels()
+	for i, obj in ipairs(levels) do
+		local name, music, background = create_level_para(obj)
+		local level = Level.new(name, music, background)
+		table.insert(GLOBAL_LEVEL_LIST, level)
+	end
+end
+
 --Creates a new Level list. Returns: List
 function Level.new(inname, inmusic, inbackground)
 	table.insert(Level, inname)
@@ -55,10 +68,9 @@ function Level.new(inname, inmusic, inbackground)
 end
 
 --Starts a new level. Returns: Nothing
-function Level.start(level)
+function Level.newLevel(level)
 	sound = love.audio.newSource(level["music"])
 	LAST_LEVEL = {lvl = level, snd = sound, background = level["background"]}
-	UPDATE_BACKGROUND = true
 	love.audio.play(sound)
 end
 
@@ -72,9 +84,7 @@ end
 
 --Called by love.draw() to draw the new background for the level. Returns: Nothing
 function Level.updateBackground()
-	if UPDATE_BACKGROUND == true then
-		love.graphics.draw(love.graphics.newImage(LAST_LEVEL["background"]), 0, 0, 0, 1, 1, 0, 0, 0, 0)
-	end
+	love.graphics.draw(love.graphics.newImage(LAST_LEVEL["background"]), 1, 1, 0, WINDOW_WIDTHB/1920, WINDOW_HEIGHTB/1080, 0, 0, 0, 0)
 end
 
 --Finds the ID of an level with the level's name based on where it is stored in the Level list. Returns: Integer or Nil

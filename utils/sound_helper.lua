@@ -1,4 +1,5 @@
 --sound_helper.lua
+--v0.9.1
 --Author: Connor Wojtak
 --Purpose: A utility used for playing and stopping sounds.
 

@@ -1,4 +1,5 @@
 --object_helper.lua
+--v0.9.1
 --Author: Connor Wojtak
 --Purpose: A utility to load objects, their attributes, and their sprites, and turn them into lists
 --containing those attributes. This file also contains functions for reading the Object lists.
@@ -7,6 +8,7 @@
 --Imports
 JSON_READER = require("utils/json/json")
 UTILS = require("utils/utils")
+EFFECT_HELPER = require("utils/effect_helper")
 
 --Directory
 WORKING_DIRECTORY = love.filesystem.getRealDirectory("objects/computer.json")
@@ -18,6 +20,7 @@ EntityObject = {}
 
 --Global Variables
 GLOBAL_ENTITYOBJECT_LIST = {}
+GLOBAL_ENTITYOBJECT_INDEX = 0
 GLOBAL_OBJECT_LIST = {}
 WINDOW_WIDTH, WINDOW_HEIGHT = love.window.getDesktopDimensions(1)
 
@@ -64,22 +67,32 @@ function find_objects()
 	return returnList
 end
 
---Decodes JSON data and makes the image parameter from JSON file into a LOVE image. Returns: String, LOVE Image
+--Decodes JSON data returns the parameters. Returns: String, LOVE Image
 function create_object_para(data) 
 	local decoded_data = json.decode(data)
 	
-	return decoded_data["name"], love.graphics.newImage("sprites/" .. decoded_data["image"] .. ".jpg"), decoded_data["special"], decoded_data["flags"] -- TODO: ADD SUPPORT FOR SPECIAL AND FLAGS
+	return decoded_data["name"], love.graphics.newImage("sprites/" .. decoded_data["image"] .. ".jpg"), decoded_data["special"], decoded_data["flags"]
 end
 
 --OBJECT CLASS
+--Called on startup. Returns: Nothing
+function Object.start()
+	local objects = find_objects()
+	for i, obj in ipairs(objects) do
+		local name, image, special, flags = create_object_para(obj)
+		local object = Object.new(name, image, special, flags)
+		table.insert(GLOBAL_OBJECT_LIST, object)
+	end
+end
+
 --Creates a new Object list, which will eventually be stored in a global list. Returns: List
 function Object.new(inname, inimage, inspecial, inflags)
 	table.insert(Object, inname)
 	local inid = Object.getIDByName(inname)
-	return {name = inname, image = inimage, special=inspecial, flags=inflags, id = inid} -- TODO: CURRENTLY NO SUPPORT FOR SPECIAL OR FLAGS
+	return {name = inname, image = inimage, special = inspecial, flags = inflags, id = inid, special = inspecial, flags = inflags}
 end
 
---Finds the ID of an object with the object's name based on where it is stored in the Object list. Returns: Integer OR Nil
+--Finds the ID of an object with the object's name based on where it is stored in the Object list. Returns: Integer or Nil
 function Object.getIDByName(objectname)
 	for i, obj in ipairs(Object) do
 		if string.find(obj, objectname) then
@@ -118,14 +131,21 @@ end
 function EntityObject.new(obj, begposx, begposy, begspeed, begdir)
 	table.insert(EntityObject, obj)
 	table.insert(GLOBAL_ENTITYOBJECT_LIST, {object = obj, begposx = begposx, begposy = begposy, speed = begspeed, direction = begdir, posx = begposx, posy = begposy})
+	a = GLOBAL_ENTITYOBJECT_LIST[1]
 	local ID = getTableLength(GLOBAL_ENTITYOBJECT_LIST)
-	return {object = obj, posx = begposx, posy = begposy, speed = begspeed, direction = begdir, posx = begposx, posy = begposy}, ID
+	
+	local obj_special = Object.getAttribute("special", obj)
+	if obj_special ~= nil or obj_special ~= "" then
+		EntityEffect.new(GLOBAL_EFFECT_LIST[Effect.getIDByName("red_effect")], begposx, begposy, 1)
+	end
+	
+	return {object = object, posx = begposx, posy = begposy, speed = begspeed, direction = begdir, posx = begposx, posy = begposy}, ID
 end
 
 --Called by love.draw() to update where the EntityObjects are. Returns: Nothing
 function EntityObject.updateObjects()
 	for i, entObj in ipairs(GLOBAL_ENTITYOBJECT_LIST) do
-		if entObj["posx"] - 64 >= WINDOW_WIDTH or entObj["posy"] - 64 >= WINDOW_HEIGHT or entObj["posx"] + 64 <= 0 or entObj["posy"] + 64 <= 0 then --Keeps EntityObjects
+		if entObj["posx"] - 64 >= WINDOW_WIDTH or entObj["posy"] - 64 >= WINDOW_HEIGHT or entObj["posx"] + 64 <= 0 or entObj["posy"] + 64 <= 0 then --Keeps EntityObjects from eating delicious memory.
 			table.remove(GLOBAL_ENTITYOBJECT_LIST, EntityObject.getIDByClass(entObj))
 		end
 		
@@ -143,7 +163,6 @@ function EntityObject.updateObjects()
 				entObj["posy"] = entObj["posy"] + entObj["speed"]
 			end
 		end
-		print(entObj["posx"])
 		local object = entObj["object"]
 		love.graphics.draw(object["image"], entObj["posx"], entObj["posy"], 0, 1, 1, 0, 0, 0, 0)
 	end
@@ -174,7 +193,7 @@ end
 
 --Finds a given attribute of an EntityObject and returns it. Returns: String, Integer, Object or Nil
 function EntityObject.getAttribute(attr, obj)
-	if attr == "obj" then
+	if attr == "object" then
 		return obj["obj"]
 	end
 	if attr == "posx" then

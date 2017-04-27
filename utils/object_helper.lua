@@ -3,7 +3,6 @@
 --Author: Connor Wojtak
 --Purpose: A utility to load objects, their attributes, and their sprites, and turn them into lists
 --containing those attributes. This file also contains functions for reading the Object lists.
---TODO: FIX POSX AND POSY ENTITYOBJECT ATTRIBUTES.
 
 --Imports
 JSON_READER = require("utils/json/json")

@@ -1,9 +1,9 @@
 --object_helper.lua
---v1.0.0
+--v1.1.2
 --Author: Connor Wojtak
 --Purpose: A utility to load objects, their attributes, and their sprites, and turn them into lists
 --containing those attributes. This file also contains functions for reading the Object lists.
---TODO: ADD SUPPORT FOR SPECIAL AND FLAGS, ADD DONT REMOVE FLAG TO ENTITYOBJECT, FIX POSX AND POSY ENTITYOBJECT ATTRIBUTES.
+--TODO: FIX POSX AND POSY ENTITYOBJECT ATTRIBUTES.
 
 --Imports
 JSON_READER = require("utils/json/json")
@@ -129,38 +129,62 @@ end
 --ENTITYOBJECT CLASS
 --Creates a new EntityObject list that is able to move from place to place. Returns: List, Integer
 function EntityObject.new(obj, begposx, begposy, begspeed, begdir)
-	table.insert(EntityObject, obj)
-	table.insert(GLOBAL_ENTITYOBJECT_LIST, {object = obj, begposx = begposx, begposy = begposy, speed = begspeed, direction = begdir, posx = begposx, posy = begposy})
-	local ID = getTableLength(GLOBAL_ENTITYOBJECT_LIST)
-	
 	local obj_special = Object.getAttribute("special", obj)
+	local obj_flags = Object.getAttribute("flags", obj) 
+	
+	if obj_flags == "can_go_offscreen" then
+		table.insert(EntityObject, obj)
+		table.insert(GLOBAL_ENTITYOBJECT_LIST, {object = obj, begposx = begposx, begposy = begposy, speed = begspeed, 	direction = begdir, posx = begposx, posy = begposy, flags = "can_go_offscreen"})
+		local ID = getTableLength(GLOBAL_ENTITYOBJECT_LIST)
+	else
+		table.insert(EntityObject, obj)
+		table.insert(GLOBAL_ENTITYOBJECT_LIST, {object = obj, begposx = begposx, begposy = begposy, speed = begspeed, 	direction = begdir, posx = begposx, posy = begposy})
+		local ID = getTableLength(GLOBAL_ENTITYOBJECT_LIST)
+	end
+	
 	if obj_special ~= nil or obj_special ~= "" then
 		EntityEffect.new(GLOBAL_EFFECT_LIST[Effect.getIDByName(obj_special)], begposx, begposy, 1, obj["mineffect"], obj["maxeffect"], ID)
 	end
-	return {object = object, posx = begposx, posy = begposy, speed = begspeed, direction = begdir, posx = begposx, posy = begposy}, ID
+	
+	return {object = object, posx = begposx, posy = begposy, speed = begspeed, direction = begdir, posx = begposx, posy = begposy, flags = nil}, ID
 end
 
 --Called by love.draw() to update where the EntityObjects are. Returns: Nothing
 function EntityObject.updateObjects()
 	for i, entObj in ipairs(GLOBAL_ENTITYOBJECT_LIST) do
 		if entObj["posx"] - 64 >= WINDOW_WIDTH or entObj["posy"] - 64 >= WINDOW_HEIGHT or entObj["posx"] + 64 <= 0 or entObj["posy"] + 64 <= 0 then --Keeps EntityObjects from eating delicious memory.
-			table.remove(GLOBAL_ENTITYOBJECT_LIST, EntityObject.getIDByClass(entObj))
+			if entObj["flags"] == nil then 
+				table.remove(GLOBAL_ENTITYOBJECT_LIST, EntityObject.getIDByClass(entObj))
+			end
 		end
+		
+		local newposx = nil
+		local newposy = nil
 		
 		if entObj["speed"] ~= 0 then
 			if entObj["direction"] == "left" then
 				entObj["posx"] = entObj["posx"] - entObj["speed"]
+				newposx = entObj["posx"]
 			end
 			if entObj["direction"] == "right" then
 				entObj["posx"] = entObj["posx"] + entObj["speed"]
+				newposx = entObj["posx"]
 			end
 			if entObj["direction"] == "up" then
 				entObj["posy"] = entObj["posy"] - entObj["speed"]
+				newposy = entObj["posy"]
 			end
 			if entObj["direction"] == "down" then
 				entObj["posy"] = entObj["posy"] + entObj["speed"]
+				newposy = entObj["posy"]
 			end
 		end
+		
+		local entID = EntityObject.getIDByClass(entObj)
+		if entObj == nil or entID == nil then return end -- Used when the EntityObject is deleted.
+		
+		GLOBAL_ENTITYOBJECT_LIST[entID] = {object = entObj["object"], begposx = entObj["begposx"], begposy = entObj["begposy"], speed = entObj["speed"], direction = entObj["direction"], posx = entObj["posx"], posy = entObj["posy"], flags = entObj["flags"]}
+		
 		local object = entObj["object"]
 		love.graphics.draw(object["image"], entObj["posx"], entObj["posy"], 0, 1, 1, 0, 0, 0, 0)
 	end

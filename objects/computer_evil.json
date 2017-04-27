@@ -1,1 +1,1 @@
-{ "name":"computer_evil" , "image":"computer_evil" , "special":"" , "flags":"" }
+{ "name":"computer_evil" , "image":"computer_evil" , "special":"can_go_offscreen" , "flags":"" }

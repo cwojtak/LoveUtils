@@ -1,5 +1,5 @@
 --main.lua
---v1.1.2
+--v1.1.4
 --Author: Connor Wojtak
 --Purpose: This file tests the utilities.
 
@@ -63,7 +63,7 @@ function love.keyreleased(key)
 		computer, computerid = EntityObject.new(GLOBAL_OBJECT_LIST[Object.getIDByName("computer")], 1024, 0, 9.8, "down")
 	end
 	if key == "f" then --Creates a evil computer.
-		computerevil, computerevilid = EntityObject.new(GLOBAL_OBJECT_LIST[Object.getIDByName("computerevil")], 1024, 0, 9.8, "down")
+		computerevil, computerevilid = EntityObject.new(GLOBAL_OBJECT_LIST[Object.getIDByName("computer_evil")], 1024, 0, 9.8, "down")
 	end
 	if key == "g" then --Creates a PotatOS.
 		potatos, potatosid = EntityObject.new(GLOBAL_OBJECT_LIST[Object.getIDByName("potatOS")], 1024, 0, 9.8, "down")

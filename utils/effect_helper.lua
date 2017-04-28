@@ -1,5 +1,5 @@
 --effect_helper.lua
---v1.1.2
+--v1.1.4
 --Author: Connor Wojtak
 --Purpose: A utility to add animated effects to an object.
 
@@ -118,12 +118,14 @@ end
 --Called by love.draw() to update the effects. Returns: Nothing
 function EntityEffect.updateEffects()
 	for i, eff in ipairs(GLOBAL_ENTITYEFFECT_LIST) do
+	
 		local entity_id = eff["ent_id"]
 		local entity_object = GLOBAL_ENTITYOBJECT_LIST[entity_id]
-		if entity_object == nil then table.remove(GLOBAL_ENTITYEFFECT_LIST, i) return end -- Used when EntityObject is deleted.
+		if entity_object == nil then table.remove(GLOBAL_ENTITYEFFECT_LIST, i) return end -- Used when EntityObject is deleted. 
+		
 		local entityposx = entity_object["posx"]
 		local entityposy = entity_object["posy"]
-
+		
 		local i = 0
 		if eff["imgstate"] == 4 then eff["imgstate"] = 1 end
 		if eff["imgstate"] == 1 then

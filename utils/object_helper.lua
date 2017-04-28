@@ -1,5 +1,5 @@
 --object_helper.lua
---v1.1.2
+--v1.1.4
 --Author: Connor Wojtak
 --Purpose: A utility to load objects, their attributes, and their sprites, and turn them into lists
 --containing those attributes. This file also contains functions for reading the Object lists.
@@ -21,32 +21,8 @@ EntityObject = {}
 GLOBAL_ENTITYOBJECT_LIST = {}
 GLOBAL_ENTITYOBJECT_INDEX = 0
 GLOBAL_OBJECT_LIST = {}
+GLOBAL_POSITION_LIST = {}
 WINDOW_WIDTH, WINDOW_HEIGHT = love.window.getDesktopDimensions(1)
-
---DEPRECATED, USE OBJECT IMAGE PROPERTY
---Finds all of the images under the "sprites/" folder. Returns: List
-function find_object_images()
-	local spritesDirectory = love.filesystem.getDirectoryItems("sprites/")
-	local returnList = {}
-	for i, dir in ipairs(spritesDirectory) do
-		if love.filesystem.isFile("sprites/" .. dir) == true then
-			if string.find(dir, ".jpg") then
-			   table.insert(returnList, dir)
-			end
-		end
-	end
-	return returnList
-end
-
---DEPRECATED, USE OBJECT IMAGE PROPERTY
---Takes the return parameter from find_object_images() and makes it into LOVE images. Returns: List
-function create_images(object_images)
-	local images = {}
-	for i, sprite in ipairs(object_images) do
-		table.insert(images, love.graphics.newImage("sprites/" .. sprite))
-	end
-	return images
-end
 
 --Finds and reads all of the JSON files under the "objects/" folder. Returns: List
 function find_objects()
@@ -133,17 +109,20 @@ function EntityObject.new(obj, begposx, begposy, begspeed, begdir)
 	
 	if obj_flags == "can_go_offscreen" then
 		table.insert(EntityObject, obj)
+		table.insert(GLOBAL_POSITION_LIST, {posx = begposx, posy = begposy})
 		table.insert(GLOBAL_ENTITYOBJECT_LIST, {object = obj, begposx = begposx, begposy = begposy, speed = begspeed, 	direction = begdir, posx = begposx, posy = begposy, flags = "can_go_offscreen"})
-		local ID = getTableLength(GLOBAL_ENTITYOBJECT_LIST)
 	else
 		table.insert(EntityObject, obj)
+		table.insert(GLOBAL_POSITION_LIST, {posx = begposx, posy = begposy})
 		table.insert(GLOBAL_ENTITYOBJECT_LIST, {object = obj, begposx = begposx, begposy = begposy, speed = begspeed, 	direction = begdir, posx = begposx, posy = begposy})
-		local ID = getTableLength(GLOBAL_ENTITYOBJECT_LIST)
+	end
+	local ID = getTableLength(GLOBAL_ENTITYOBJECT_LIST)
+	
+	if obj_special == nil or obj_special == "" then return 
+		{object = object, posx = begposx, posy = begposy, speed = begspeed, direction = begdir, posx = begposx, posy = begposy, flags = nil}, ID 
 	end
 	
-	if obj_special ~= nil or obj_special ~= "" then
-		EntityEffect.new(GLOBAL_EFFECT_LIST[Effect.getIDByName(obj_special)], begposx, begposy, 1, obj["mineffect"], obj["maxeffect"], ID)
-	end
+	EntityEffect.new(GLOBAL_EFFECT_LIST[Effect.getIDByName(obj_special)], begposx, begposy, 1, obj["mineffect"], obj["maxeffect"], ID)
 	
 	return {object = object, posx = begposx, posy = begposy, speed = begspeed, direction = begdir, posx = begposx, posy = begposy, flags = nil}, ID
 end
@@ -154,6 +133,7 @@ function EntityObject.updateObjects()
 		if entObj["posx"] - 64 >= WINDOW_WIDTH or entObj["posy"] - 64 >= WINDOW_HEIGHT or entObj["posx"] + 64 <= 0 or entObj["posy"] + 64 <= 0 then --Keeps EntityObjects from eating delicious memory.
 			if entObj["flags"] == nil then 
 				table.remove(GLOBAL_ENTITYOBJECT_LIST, EntityObject.getIDByClass(entObj))
+				table.remove(GLOBAL_POSITION_LIST, EntityObject.getIDByClass(entObj))
 			end
 		end
 		
@@ -182,7 +162,11 @@ function EntityObject.updateObjects()
 		local entID = EntityObject.getIDByClass(entObj)
 		if entObj == nil or entID == nil then return end -- Used when the EntityObject is deleted.
 		
-		GLOBAL_ENTITYOBJECT_LIST[entID] = {object = entObj["object"], begposx = entObj["begposx"], begposy = entObj["begposy"], speed = entObj["speed"], direction = entObj["direction"], posx = entObj["posx"], posy = entObj["posy"], flags = entObj["flags"]}
+		if GLOBAL_ENTITYOBJECT_INDEX >= 100000 then
+			GLOBAL_POSITION_LIST[EntityObject.getIDByClass(entObj)] = {posx = newposx, posy = newposy}
+			GLOBAL_ENTITYOBJECT_INDEX = 0
+		end
+		GLOBAL_ENTITYOBJECT_INDEX = GLOBAL_ENTITYOBJECT_INDEX + 1
 		
 		local object = entObj["object"]
 		love.graphics.draw(object["image"], entObj["posx"], entObj["posy"], 0, 1, 1, 0, 0, 0, 0)
@@ -212,27 +196,54 @@ function EntityObject.getEntityObjectByID(objectID)
 	return EntityObject[objectID]
 end
 
+--DEPRECATED: USE ENTITYOBJECT PROPERTIES
 --Finds a given attribute of an EntityObject and returns it. Returns: String, Integer, Object or Nil
-function EntityObject.getAttribute(attr, obj)
-	if attr == "object" then
-		return obj["obj"]
-	end
-	if attr == "posx" then
-		return obj["posx"]
-	end
-	if attr == "posy" then
-		return obj["posy"]
-	end
-	if attr == "speed" then
-		return obj["speed"]
-	end
-	if attr == "direction" then
-		return obj["direction"]
-	end
-	if attr == "begposx" then
-		return obj["begposx"]
-	end
-	if attr == "begposy" then
-		return obj["begposy"]
-	end
-end
+--function EntityObject.getAttribute(attr, obj)
+	--if attr == "object" then
+		--return obj["obj"]
+	--end
+	--if attr == "posx" then
+		--return obj["posx"]
+	--end
+	--if attr == "posy" then
+		--print(obj["posy"])
+		--return obj["posy"]
+	--end
+	--if attr == "speed" then
+		--return obj["speed"]
+	--end
+	--if attr == "direction" then
+		--return obj["direction"]
+	--end
+	--if attr == "begposx" then
+		--return obj["begposx"]
+	--end
+	--if attr == "begposy" then
+		--return obj["begposy"]
+	--end
+--end
+
+--DEPRECATED, USE OBJECT IMAGE PROPERTY
+--Finds all of the images under the "sprites/" folder. Returns: List
+--function find_object_images()
+	--local spritesDirectory = love.filesystem.getDirectoryItems("sprites/")
+	--local returnList = {}
+	--for i, dir in ipairs(spritesDirectory) do
+		--if love.filesystem.isFile("sprites/" .. dir) == true then
+			--if string.find(dir, ".jpg") then
+			   --table.insert(returnList, dir)
+			--end
+		--end
+	--end
+	--return returnList
+--end
+
+--DEPRECATED, USE OBJECT IMAGE PROPERTY
+--Takes the return parameter from find_object_images() and makes it into LOVE images. Returns: List
+--function create_images(object_images)
+	--local images = {}
+	--for i, sprite in ipairs(object_images) do
+		--table.insert(images, love.graphics.newImage("sprites/" .. sprite))
+	--end
+	--return images
+--end

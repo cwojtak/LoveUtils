@@ -1,5 +1,5 @@
 --level_helper.lua
---v1.1.4
+--v1.1.5
 --Author: Connor Wojtak
 --Purpose: A utility to load levels, their attributes, and their backgrounds, and turn them into
 --lists containing those attributes. This file also contains functions for reading the Level lists.
@@ -12,10 +12,6 @@ OBJECT_HELPER = require("utils/object_helper")
 --Global Variables
 GLOBAL_LEVEL_LIST = {}
 GLOBAL_LEVEL_INDEX = 0
-
---Directory
-WORKING_DIRECTORY = love.filesystem.getRealDirectory("objects/computer.json")
-local open = io.open
 
 --Classes
 Level = {}
@@ -32,11 +28,9 @@ function find_levels()
 	for i, dir in ipairs(JSONDirectory) do
 		if love.filesystem.isFile("levels/" .. dir) == true then
 			if string.find(dir, ".json") then
-			    local file = open(WORKING_DIRECTORY .. "/levels/" .. dir, "rb")
-				if not file then return nil end
-				local content = file:read "*a"
+			    local content = love.filesystem.read("levels/" .. dir)
+				if not content then print("ERROR: No level files loaded. If you are using levels, this will cause problems.") return nil end
 				table.insert(returnList, content)
-				file:close()
 			end
 		end
 	end
@@ -53,6 +47,7 @@ end
 --Called on startup. Returns: Nothing
 function Level.start()
 	local levels = find_levels()
+	if levels == nil or levels == {} then return end
 	for i, obj in ipairs(levels) do
 		local name, music, background = create_level_para(obj)
 		local level = Level.new(name, music, background)

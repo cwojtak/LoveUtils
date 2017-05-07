@@ -1,5 +1,5 @@
 --object_helper.lua
---v1.1.4
+--v1.1.5
 --Author: Connor Wojtak
 --Purpose: A utility to load objects, their attributes, and their sprites, and turn them into lists
 --containing those attributes. This file also contains functions for reading the Object lists.
@@ -9,9 +9,6 @@ JSON_READER = require("utils/json/json")
 UTILS = require("utils/utils")
 EFFECT_HELPER = require("utils/effect_helper")
 
---Directory
-WORKING_DIRECTORY = love.filesystem.getRealDirectory("objects/computer.json")
-local open = io.open
 
 --Classes
 Object = {}
@@ -31,11 +28,9 @@ function find_objects()
 	for i, dir in ipairs(JSONDirectory) do
 		if love.filesystem.isFile("objects/" .. dir) == true then
 			if string.find(dir, ".json") then
-			    local file = open(WORKING_DIRECTORY .. "/objects/" .. dir, "rb")
-				if not file then return nil end
-				local content = file:read "*a"
+			    local content = love.filesystem.read("objects/" .. dir)
+				if not content then print("ERROR: No object files loaded. If you are using objects, this will cause problems.") return nil end
 				table.insert(returnList, content)
-				file:close()
 			end
 		end
 	end
@@ -53,6 +48,7 @@ end
 --Called on startup. Returns: Nothing
 function Object.start()
 	local objects = find_objects()
+	if objects == nil or objects == {} then return end
 	for i, obj in ipairs(objects) do
 		local name, image, special, flags, min_effect, max_effect = create_object_para(obj)
 		local object = Object.new(name, image, special, flags, min_effect, max_effect)

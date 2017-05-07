@@ -1,14 +1,11 @@
 --sound_helper.lua
---v1.1.4
+--v1.1.5
 --Author: Connor Wojtak
 --Purpose: A utility used for playing and stopping sounds.
 
 --Imports
 JSON_READER = require("utils/json/json")
 UTILS = require("utils/utils")
-
---Directory
-WORKING_DIRECTORY = love.filesystem.getRealDirectory("objects/computer.json")
 
 --Classes
 Sound = {}

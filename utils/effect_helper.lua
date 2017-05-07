@@ -1,15 +1,11 @@
 --effect_helper.lua
---v1.1.4
+--v1.1.5
 --Author: Connor Wojtak
 --Purpose: A utility to add animated effects to an object.
 
 --Imports
 JSON_READER = require("utils/json/json")
 UTILS = require("utils/utils")
-
---Directory
-WORKING_DIRECTORY = love.filesystem.getRealDirectory("effects/computer.json")
-local open = io.open
 
 --Classes
 Effect = {}
@@ -30,11 +26,9 @@ function find_effects()
 	for i, dir in ipairs(JSONDirectory) do
 		if love.filesystem.isFile("effects/" .. dir) == true then
 			if string.find(dir, ".json") then
-			    local file = open(WORKING_DIRECTORY .. "/effects/" .. dir, "rb")
-				if not file then return nil end
-				local content = file:read "*a"
+				local content = love.filesystem.read("effects/" .. dir)
+				if not content then print("ERROR: No effect files loaded. If you are using effects, this will cause problems.") return nil end
 				table.insert(returnList, content)
-				file:close()
 			end
 		end
 	end
@@ -51,6 +45,7 @@ end
 --Called on startup. Returns: Nothing
 function Effect.start()
 	local effects = find_effects()
+	if effects == nil or effects == {} then return end
 	for i, eff in ipairs(effects) do
 		local name, image1, image2, image3  = create_effect_para(eff)
 		local effect = Effect.new(name, image1, image2, image3)

@@ -1,5 +1,5 @@
 --object_helper.lua
---v1.1.6
+--v1.1.7
 --Author: Connor Wojtak
 --Purpose: A utility to load objects, their attributes, and their sprites, and turn them into lists
 --containing those attributes. This file also contains functions for reading the Object lists.
@@ -76,6 +76,11 @@ end
 --Finds the name of an object with the object's ID based on where it is stored in the Object list. Returns: String or Nil
 function Object.getNameByID(objectID)
 	return Object[objectID]
+end
+
+--Finds an Object based on where it is stored in the GLOBAL_OBJECT_LIST. Returns: List or Nil
+function Object.getClassByID(objectID)
+	return GLOBAL_OBJECT_LIST[objectID]
 end
 
 --Finds a given attribute of an object and returns it. Returns: String, Integer, Image or Nil

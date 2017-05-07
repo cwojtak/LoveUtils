@@ -1,5 +1,5 @@
 --main.lua
---v1.1.5
+--v1.1.6
 --Author: Connor Wojtak
 --Purpose: This file tests the utilities.
 
@@ -7,6 +7,7 @@ function love.load()
 	--Initalize modules
 	OBJECT_HELPER = require("utils/object_helper")
 	LEVEL_HELPER = require("utils/level_helper")
+	EFFECT_HELPER = require("utils/effect_helper")
 	
 	--Load objects and levels
 	Object.start()
@@ -15,7 +16,6 @@ function love.load()
 	
 	--Set default graphics, etc.
 	love.graphics.setNewFont(12)
-    --love.graphics.setBackgroundColor(0, 0, 0)
 	WINDOW_WIDTHA, WINDOW_HEIGHTA = love.window.getDesktopDimensions(1)
 	screen = love.window.setMode(WINDOW_WIDTHA, WINDOW_HEIGHTA)
 	if screen == false then

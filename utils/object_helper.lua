@@ -1,5 +1,5 @@
 --object_helper.lua
---v1.1.5
+--v1.1.6
 --Author: Connor Wojtak
 --Purpose: A utility to load objects, their attributes, and their sprites, and turn them into lists
 --containing those attributes. This file also contains functions for reading the Object lists.

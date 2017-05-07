@@ -1,5 +1,5 @@
 --effect_helper.lua
---v1.1.5
+--v1.1.6
 --Author: Connor Wojtak
 --Purpose: A utility to add animated effects to an object.
 

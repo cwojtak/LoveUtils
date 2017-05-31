@@ -1,5 +1,5 @@
 --object_helper.lua
---v1.1.7
+--v1.6.4
 --Author: Connor Wojtak
 --Purpose: A utility to load objects, their attributes, and their sprites, and turn them into lists
 --containing those attributes. This file also contains functions for reading the Object lists.
@@ -40,8 +40,7 @@ end
 --Decodes JSON data returns the parameters. Returns: String, LOVE Image
 function create_object_para(data) 
 	local decoded_data = json.decode(data)
-	
-	return decoded_data["name"], love.graphics.newImage("sprites/" .. decoded_data["image"] .. ".jpg"), decoded_data["special"], decoded_data["flags"], decoded_data["min_effect"], decoded_data["max_effect"]
+	return decoded_data["name"], love.graphics.newImage("sprites/" .. decoded_data["image"] .. ".jpg"), decoded_data["size"], decoded_data["special"], decoded_data["flags"], decoded_data["min_effect"], decoded_data["max_effect"]
 end
 
 --OBJECT CLASS
@@ -50,17 +49,18 @@ function Object.start()
 	local objects = find_objects()
 	if objects == nil or objects == {} then return end
 	for i, obj in ipairs(objects) do
-		local name, image, special, flags, min_effect, max_effect = create_object_para(obj)
-		local object = Object.new(name, image, special, flags, min_effect, max_effect)
+		local name, image, size, special, flags, min_effect, max_effect = create_object_para(obj)
+		local object = Object.new(name, image, size, special, flags, min_effect, max_effect)
 		table.insert(GLOBAL_OBJECT_LIST, object)
+		local a = GLOBAL_OBJECT_LIST[i]
 	end
 end
 
 --Creates a new Object list, which will eventually be stored in a global list. Returns: List
-function Object.new(inname, inimage, inspecial, inflags, minffect, maxffect)
+function Object.new(inname, inimage, insize, inspecial, inflags, minffect, maxffect)
 	table.insert(Object, inname)
 	local inid = Object.getIDByName(inname)
-	return {name = inname, image = inimage, special = inspecial, flags = inflags, id = inid, special = inspecial, flags = inflags, mineffect = minffect, maxeffect = maxffect}
+	return {name = inname, image = inimage, size=insize, special = inspecial, flags = inflags, id = inid, special = inspecial, flags = inflags, mineffect = minffect, maxeffect = maxffect}
 end
 
 --Finds the ID of an object with the object's name based on where it is stored in the Object list. Returns: Integer or Nil
@@ -90,6 +90,9 @@ function Object.getAttribute(attr, obj)
 	end
 	if attr == "image" then
 		return obj["image"]
+	end
+	if attr == "size" then
+		return obj["size"]
 	end
 	if attr == "special" then
 		return obj["special"]
@@ -207,7 +210,6 @@ end
 		--return obj["posx"]
 	--end
 	--if attr == "posy" then
-		--print(obj["posy"])
 		--return obj["posy"]
 	--end
 	--if attr == "speed" then

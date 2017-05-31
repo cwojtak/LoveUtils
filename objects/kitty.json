@@ -1,1 +1,1 @@
-{ "name":"kitty" , "image":"kitty" , "special":"blue_effect" , "flags":"" , "min_effect":"1" , "max_effect":"5" }
+{ "name":"kitty" , "image":"kitty" , "size":"64" , "special":"blue_effect" , "flags":"" , "min_effect":"1" , "max_effect":"5" }

@@ -1,5 +1,5 @@
 --main.lua
---v1.1.7
+--v1.6.4
 --Author: Connor Wojtak
 --Purpose: This file tests the utilities.
 
@@ -8,11 +8,13 @@ function love.load()
 	OBJECT_HELPER = require("utils/object_helper")
 	LEVEL_HELPER = require("utils/level_helper")
 	EFFECT_HELPER = require("utils/effect_helper")
+	SOUND_HELPER = require("utils/sound_helper")
 	
 	--Load objects and levels
 	Object.start()
 	Level.start()
 	Effect.start()
+	Sound.start()
 	
 	--Set default graphics, etc.
 	love.graphics.setNewFont(12)

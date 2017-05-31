@@ -1,5 +1,5 @@
 --level_helper.lua
---v1.1.7
+--v1.6.4
 --Author: Connor Wojtak
 --Purpose: A utility to load levels, their attributes, and their backgrounds, and turn them into
 --lists containing those attributes. This file also contains functions for reading the Level lists.
@@ -8,6 +8,7 @@
 JSON_READER = require("utils/json/json")
 UTILS = require("utils/utils")
 OBJECT_HELPER = require("utils/object_helper")
+SOUND_HELPER = require("utils/sound_helper")
 
 --Global Variables
 GLOBAL_LEVEL_LIST = {}
@@ -64,15 +65,15 @@ end
 
 --Starts a new level. Returns: Nothing
 function Level.newLevel(level)
-	sound = love.audio.newSource(level["music"])
+	sound = level["music"]
 	LAST_LEVEL = {lvl = level, snd = sound, background = level["background"]}
-	love.audio.play(sound)
+	Sound.play(sound)
 end
 
 --Stops the current running level. Returns: Nothing
 function Level.stop()
 	local level = LAST_LEVEL
-	love.audio.stop(level["snd"])
+	Sound.stop(Sound.getIDByName(level["snd"]))
 	GLOBAL_ENTITYOBJECT_LIST = {}
 	LAST_LEVEL = nil
 end
@@ -95,6 +96,16 @@ end
 --Finds the name of an level with the level's ID based on where it is stored in the Level list. Returns: String or Nil
 function Level.getNameByID(levelID)
 	return Level[levelID]
+end
+
+--Finds the name of an level with the level's ID based on where it is stored in the Level list. Returns: String or Nil
+function Level.getClassByName(name)
+	for i, lvl in ipairs(GLOBAL_LEVEL_LIST) do
+		if string.find(lvl["name"], name) then
+			return lvl
+		end
+	end
+	return nil
 end
 
 --Finds a given attribute of an level and returns it. Returns: String, Integer, Image or Nil

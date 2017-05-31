@@ -1,5 +1,5 @@
 --effect_helper.lua
---v1.1.7
+--v1.6.4
 --Author: Connor Wojtak
 --Purpose: A utility to add animated effects to an object.
 
@@ -14,10 +14,14 @@ EntityEffect = {}
 --Global Variables
 GLOBAL_EFFECT_LIST = {}
 GLOBAL_ENTITYEFFECT_LIST = {}
+GLOBAL_POSITION_LIST_X = {}
+GLOBAL_POSITION_LIST_Y = {}
 GLOBAL_ENTITYEFFECT_INDEX = 0
 
 --Random
 math.randomseed(os.time())
+local randx = nil
+local randy = nil
 
 --Finds and reads all of the JSON files under the "effects/" folder. Returns: List
 function find_effects()
@@ -76,8 +80,8 @@ function Effect.getIDByName(effectname)
 	return nil
 end
 
---Finds the name of an effect with the effect's ID based on where it is stored in the Effect list. Returns: String or Nil
-function Effect.getNameByID(effectID)
+--Finds the class of an effect with the effect's ID based on where it is stored in the Effect list. Returns: String or Nil
+function Effect.getClassByID(effectID)
 	return Effect[effectID]
 end
 
@@ -113,31 +117,46 @@ end
 --Called by love.draw() to update the effects. Returns: Nothing
 function EntityEffect.updateEffects()
 	for i, eff in ipairs(GLOBAL_ENTITYEFFECT_LIST) do
-	
 		local entity_id = eff["ent_id"]
 		local entity_object = GLOBAL_ENTITYOBJECT_LIST[entity_id]
 		if entity_object == nil then table.remove(GLOBAL_ENTITYEFFECT_LIST, i) return end -- Used when EntityObject is deleted. 
+		local object = entity_object["object"]
+		if object == nil then return end
+		
+		local size = object["size"]
 		
 		local entityposx = entity_object["posx"]
 		local entityposy = entity_object["posy"]
 		
-		local i = 0
+		if GLOBAL_ENTITYEFFECT_INDEX == 0 or GLOBAL_ENTITYEFFECT_INDEX == 15 or GLOBAL_ENTITYEFFECT_INDEX == 30 or GLOBAL_ENTITYEFFECT_INDEX == 45 or GLOBAL_ENTITYEFFECT_INDEX == 60 or GLOBAL_ENTITYEFFECT_INDEX == 75 then
+			local i = 0
+			while(i < eff["am_effect"]) do
+				GLOBAL_POSITION_LIST_X[i] = math.random(-size/8, size) * 2
+				GLOBAL_POSITION_LIST_Y[i] = math.random(-size/8, size) * 2
+				i = i + 1
+			end
+		end
+		
+		i = 0
 		if eff["imgstate"] == 4 then eff["imgstate"] = 1 end
 		if eff["imgstate"] == 1 then
 			while(i ~= eff["am_effect"]) do
-				love.graphics.draw(eff["image1"], entityposx + math.random(0, 60), entityposy + math.random(0, 60), 0, 0.2, 0.2, 0, 0, 0, 0)
+				if GLOBAL_POSITION_LIST_X[i] == nil or GLOBAL_POSITION_LIST_Y[i] == nil then return end
+				love.graphics.draw(eff["image1"], entityposx + GLOBAL_POSITION_LIST_X[i], entityposy + GLOBAL_POSITION_LIST_Y[i], 0, size/(size*8), size/(size*8), 0, 0, 0, 0)
 				i = i + 1
 			end
 		end
 		if eff["imgstate"] == 2 then
+			if GLOBAL_POSITION_LIST_X[i] == nil or GLOBAL_POSITION_LIST_Y[i] == nil then return end
 			while(i ~= eff["am_effect"]) do
-				love.graphics.draw(eff["image2"], entityposx + math.random(0, 60), entityposy + math.random(0, 60), 0, 0.2, 0.2, 0, 0, 0, 0)
+				love.graphics.draw(eff["image2"], entityposx + GLOBAL_POSITION_LIST_X[i], entityposy + GLOBAL_POSITION_LIST_Y[i], 0, size/(size*8), size/(size*8), 0, 0, 0, 0)
 				i = i + 1
 			end
 		end
 		if eff["imgstate"] == 3 then
+			if GLOBAL_POSITION_LIST_X[i] == nil or GLOBAL_POSITION_LIST_Y[i] == nil then return end
 			while(i ~= eff["am_effect"]) do
-				love.graphics.draw(eff["image3"], entityposx + math.random(0, 60), entityposy + math.random(0, 60), 0, 0.2, 0.2, 0, 0, 0, 0)
+				love.graphics.draw(eff["image3"], entityposx + GLOBAL_POSITION_LIST_X[i], entityposy + GLOBAL_POSITION_LIST_Y[i], 0, size/(size*8), size/(size*8), 0, 0, 0, 0)
 				i = i + 1
 			end
 		end
@@ -145,8 +164,9 @@ function EntityEffect.updateEffects()
 			eff["imgstate"] = eff["imgstate"] + 1
 			GLOBAL_ENTITYEFFECT_INDEX = 0
 		end
-		GLOBAL_ENTITYEFFECT_INDEX = GLOBAL_ENTITYEFFECT_INDEX + 1
+  	GLOBAL_ENTITYEFFECT_INDEX = GLOBAL_ENTITYEFFECT_INDEX + 1
 	end
+	collectgarbage()
 end
 
 --Finds the ID of an EntityEffect by indexing the GLOBAL_ENTITYEFFECT_LIST with the given EntityEffect. Returns: Integer or Nil

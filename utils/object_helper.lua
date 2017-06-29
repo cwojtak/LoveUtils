@@ -1,53 +1,22 @@
 --object_helper.lua
---v0.9.1
+--v1.6.9
 --Author: Connor Wojtak
---Purpose: A utility to load objects, their attributes, and their sprites, and turn them into lists
---containing those attributes. This file also contains functions for reading the Object lists.
---TODO: ADD SUPPORT FOR SPECIAL AND FLAGS, ADD DONT REMOVE FLAG TO ENTITYOBJECT, FIX POSX AND POSY ENTITYOBJECT ATTRIBUTES.
+--Purpose: A utility to load and create objects, their attributes, and their sprites. This file also contains functions for reading attributes from Objects and EntityObjects.
 
 --Imports
-JSON_READER = require("utils/json/json")
-UTILS = require("utils/utils")
-EFFECT_HELPER = require("utils/effect_helper")
+local JSON_READER = require("utils/json/json")
+local UTILS = require("utils/utils")
+local EFFECT_HELPER = require("utils/effect_helper")
 
---Directory
-WORKING_DIRECTORY = love.filesystem.getRealDirectory("objects/computer.json")
-local open = io.open
 
 --Classes
-Object = {}
-EntityObject = {}
+Object = {name=nil, image=nil, size=nil, effect=nil, flags=nil, id=nil, min_effect=nil, max_effect=nil}
+EntityObject = {object=nil, speed=nil, direction=nil, posx=nil, posy=nil, flags=nil}
 
 --Global Variables
+GLOBAL_OBJECT_LIST = {}
 GLOBAL_ENTITYOBJECT_LIST = {}
 GLOBAL_ENTITYOBJECT_INDEX = 0
-GLOBAL_OBJECT_LIST = {}
-WINDOW_WIDTH, WINDOW_HEIGHT = love.window.getDesktopDimensions(1)
-
---DEPRECATED, USE OBJECT IMAGE PROPERTY
---Finds all of the images under the "sprites/" folder. Returns: List
-function find_object_images()
-	local spritesDirectory = love.filesystem.getDirectoryItems("sprites/")
-	local returnList = {}
-	for i, dir in ipairs(spritesDirectory) do
-		if love.filesystem.isFile("sprites/" .. dir) == true then
-			if string.find(dir, ".jpg") then
-			   table.insert(returnList, dir)
-			end
-		end
-	end
-	return returnList
-end
-
---DEPRECATED, USE OBJECT IMAGE PROPERTY
---Takes the return parameter from find_object_images() and makes it into LOVE images. Returns: List
-function create_images(object_images)
-	local images = {}
-	for i, sprite in ipairs(object_images) do
-		table.insert(images, love.graphics.newImage("sprites/" .. sprite))
-	end
-	return images
-end
 
 --Finds and reads all of the JSON files under the "objects/" folder. Returns: List
 function find_objects()
@@ -56,11 +25,9 @@ function find_objects()
 	for i, dir in ipairs(JSONDirectory) do
 		if love.filesystem.isFile("objects/" .. dir) == true then
 			if string.find(dir, ".json") then
-			    local file = open(WORKING_DIRECTORY .. "/objects/" .. dir, "rb")
-				if not file then return nil end
-				local content = file:read "*a"
+			    local content = love.filesystem.read("objects/" .. dir)
+				if not content then print("ERROR: No object files loaded. If you are using objects, this will cause problems.") return nil end
 				table.insert(returnList, content)
-				file:close()
 			end
 		end
 	end
@@ -70,148 +37,274 @@ end
 --Decodes JSON data returns the parameters. Returns: String, LOVE Image
 function create_object_para(data) 
 	local decoded_data = json.decode(data)
-	
-	return decoded_data["name"], love.graphics.newImage("sprites/" .. decoded_data["image"] .. ".jpg"), decoded_data["special"], decoded_data["flags"]
+	return decoded_data["name"], love.graphics.newImage("sprites/" .. decoded_data["image"] .. ".jpg"), decoded_data["size"], decoded_data["effect"], decoded_data["flags"], decoded_data["min_effect"], decoded_data["max_effect"]
 end
 
 --OBJECT CLASS
 --Called on startup. Returns: Nothing
 function Object.start()
 	local objects = find_objects()
+	if objects == nil or objects == {} then return end
 	for i, obj in ipairs(objects) do
-		local name, image, special, flags = create_object_para(obj)
-		local object = Object.new(name, image, special, flags)
+		local name, image, size, effect, flags, min_effect, max_effect = create_object_para(obj)
+		local object = Object:new(name, image, size, effect, flags, min_effect, max_effect)
 		table.insert(GLOBAL_OBJECT_LIST, object)
 	end
 end
 
---Creates a new Object list, which will eventually be stored in a global list. Returns: List
-function Object.new(inname, inimage, inspecial, inflags)
-	table.insert(Object, inname)
-	local inid = Object.getIDByName(inname)
-	return {name = inname, image = inimage, special = inspecial, flags = inflags, id = inid, special = inspecial, flags = inflags}
+--Creates a new Object, which will be stored in a global list. Returns: Object
+function Object:new(inname, inimage, insize, ineffect, inflags, minffect, maxffect)
+	local inobj = Object.getObjectByName(inname)
+	local inid = getTableLength(GLOBAL_OBJECT_LIST)
+	local obj = {name = inname, image = inimage, size=insize, id = inid, effect = ineffect, flags = inflags, mineffect = minffect, maxeffect = maxffect}
+    setmetatable(obj, self)
+    self.__index = self
+    return obj
 end
 
---Finds the ID of an object with the object's name based on where it is stored in the Object list. Returns: Integer or Nil
-function Object.getIDByName(objectname)
-	for i, obj in ipairs(Object) do
-		if string.find(obj, objectname) then
-			return i
+--Finds an Object in the global list using a given name. Returns: Object or Nil
+function Object.getObjectByName(objectname)
+	for i, obj in ipairs(GLOBAL_OBJECT_LIST) do
+		if string.find(obj:getName(), objectname) then
+			return obj
 		end
 	end
 	return nil
 end
 
---Finds the name of an object with the object's ID based on where it is stored in the Object list. Returns: String or Nil
-function Object.getNameByID(objectID)
-	return Object[objectID]
+--Finds an Object in the global list using a given ID. Returns: Object or Nil
+function Object.getObjectByID(objectID)
+	for i, obj in ipairs(GLOBAL_OBJECT_LIST) do
+		if obj:getID() == objectID then
+			return obj
+		end
+	end
+	return nil
 end
 
---Finds a given attribute of an object and returns it. Returns: String, Integer, Image or Nil
-function Object.getAttribute(attr, obj)
-	if attr == "name" then
-		return obj["name"]
-	end
-	if attr == "image" then
-		return obj["image"]
-	end
-	if attr == "special" then
-		return obj["special"]
-	end
-	if attr == "flags" then
-		return obj["flags"]
-	end
-	if attr == "id" then
-		return obj["id"]
-	end
+--OBJECT ATTRIBUTE GETTERS/SETTERS
+--Gets or sets an attribute of an object. Returns: Attribute or Nil
+function Object:getName()
+	if not self == GLOBAL_OBJECT_LIST[self:getID()] then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
+	return self["name"]
+end
+	
+function Object:getImage()
+	if not self == GLOBAL_OBJECT_LIST[self:getID()] then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
+	return self["image"]
+end	
+	
+function Object:getSize()
+	if not self == GLOBAL_OBJECT_LIST[self:getID()] then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
+	return self["size"]
+end
+
+function Object:getEffect()
+	if not self == GLOBAL_OBJECT_LIST[self:getID()] then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
+	return self["effect"]
+end
+
+function Object:getMinEffect()
+	if not self == GLOBAL_OBJECT_LIST[self:getID()] then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
+	return self["mineffect"]
+end
+
+function Object:getMaxEffect()
+	if not self == GLOBAL_OBJECT_LIST[self:getID()] then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
+	return self["maxeffect"]
+end
+
+
+function Object:getFlags()
+	if not self == GLOBAL_OBJECT_LIST[self:getID()] then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
+	return self["flags"]
+end
+
+function Object:getID()
+	return self["id"]
+end
+
+function Object:setName(attr)
+	local obj = GLOBAL_OBJECT_LIST[self:getID()]
+	obj["name"] = attr
+	self["name"] = attr
+end
+	
+function Object:setImage(attr)
+	local obj = GLOBAL_OBJECT_LIST[self:getID()]
+	obj["image"] = attr
+	self["image"] = attr
+end	
+	
+function Object:setSize(attr)
+	local obj = GLOBAL_OBJECT_LIST[self:getID()]
+	obj["size"] = attr
+	self["size"] = attr
+end
+
+function Object:setEffect(attr)
+	local obj = GLOBAL_OBJECT_LIST[self:getID()]
+	obj["effect"] = attr
+	self["effect"] = attr
+end
+
+function Object:setMinEffect(attr)
+	local obj = GLOBAL_OBJECT_LIST[self:getID()]
+	obj["mineffect"] = attr
+	self["mineffect"] = attr
+end
+
+function Object:setMaxEffect(attr)
+	local obj = GLOBAL_OBJECT_LIST[self:getID()]
+	obj["maxeffect"] = attr
+	self["maxeffect"] = attr
+end
+
+function Object:setFlags(attr)
+	local obj = GLOBAL_OBJECT_LIST[self:getID()]
+	obj["flags"] = attr
+	self["flags"] = attr
 end
 
 --ENTITYOBJECT CLASS
---Creates a new EntityObject list that is able to move from place to place. Returns: List, Integer
-function EntityObject.new(obj, begposx, begposy, begspeed, begdir)
-	table.insert(EntityObject, obj)
-	table.insert(GLOBAL_ENTITYOBJECT_LIST, {object = obj, begposx = begposx, begposy = begposy, speed = begspeed, direction = begdir, posx = begposx, posy = begposy})
-	a = GLOBAL_ENTITYOBJECT_LIST[1]
+--Creates a new EntityObject, an object that can move across the screen. Returns: EntityObject
+function EntityObject:new(obj, begposx, begposy, begspeed, begdir)
+	local obj_effect = obj:getEffect()
+	local obj_flags = obj:getFlags()
 	local ID = getTableLength(GLOBAL_ENTITYOBJECT_LIST)
 	
-	local obj_special = Object.getAttribute("special", obj)
-	if obj_special ~= nil or obj_special ~= "" then
-		EntityEffect.new(GLOBAL_EFFECT_LIST[Effect.getIDByName("red_effect")], begposx, begposy, 1)
-	end
+	local eobj = {object = obj, speed = begspeed, direction = begdir, posx = begposx, posy = begposy, id = ID}
 	
-	return {object = object, posx = begposx, posy = begposy, speed = begspeed, direction = begdir, posx = begposx, posy = begposy}, ID
+	setmetatable(eobj, self)
+    self.__index = self
+	
+	table.insert(GLOBAL_ENTITYOBJECT_LIST, eobj)
+	
+	if obj_effect == nil or obj_effect == "" then return eobj end
+	
+	EntityEffect.new(GLOBAL_EFFECT_LIST[Effect.getIDByName(obj_effect)], begposx, begposy, 1, obj:getMinEffect(), obj:getMaxEffect(), ID) --------------------TODO: FIX ENTITYEFFECTS
+	
+	return eobj
 end
 
---Called by love.draw() to update where the EntityObjects are. Returns: Nothing
+--Called by love.draw() to update the EntityObjects. Returns: Nothing
 function EntityObject.updateObjects()
 	for i, entObj in ipairs(GLOBAL_ENTITYOBJECT_LIST) do
-		if entObj["posx"] - 64 >= WINDOW_WIDTH or entObj["posy"] - 64 >= WINDOW_HEIGHT or entObj["posx"] + 64 <= 0 or entObj["posy"] + 64 <= 0 then --Keeps EntityObjects from eating delicious memory.
-			table.remove(GLOBAL_ENTITYOBJECT_LIST, EntityObject.getIDByClass(entObj))
+		local innerobj = entObj:getObject()
+		local size = innerobj:getSize()
+	
+		if entObj:getPosX() - size*4 >= WINDOW_WIDTH or entObj:getPosY() - size*4 >= WINDOW_HEIGHT or entObj:getPosX() + size*4 <= 0 or entObj:getPosY() + size*4 <= 0 then --Keeps EntityObjects from eating delicious memory.
+			if innerobj:getFlags() == nil then 
+				table.remove(GLOBAL_ENTITYOBJECT_LIST, i)
+				return
+			end
 		end
 		
-		if entObj["speed"] ~= 0 then
-			if entObj["direction"] == "left" then
-				entObj["posx"] = entObj["posx"] - entObj["speed"]
+		local newposx = nil
+		local newposy = nil
+		
+		if entObj:getSpeed() ~= 0 then
+			if entObj:getDirection() == "left" then
+				entObj:setPosX(entObj:getPosX() - entObj:getSpeed())
 			end
 			if entObj["direction"] == "right" then
-				entObj["posx"] = entObj["posx"] + entObj["speed"]
+				entObj:setPosX(entObj:getPosX() + entObj:getSpeed())
 			end
 			if entObj["direction"] == "up" then
-				entObj["posy"] = entObj["posy"] - entObj["speed"]
+				entObj:setPosY(entObj:getPosY() - entObj:getSpeed())
 			end
 			if entObj["direction"] == "down" then
-				entObj["posy"] = entObj["posy"] + entObj["speed"]
+				entObj:setPosY(entObj:getPosY() + entObj:getSpeed())
 			end
 		end
-		local object = entObj["object"]
-		love.graphics.draw(object["image"], entObj["posx"], entObj["posy"], 0, 1, 1, 0, 0, 0, 0)
+		
+		if GLOBAL_ENTITYOBJECT_INDEX >= 100000 then
+			GLOBAL_ENTITYOBJECT_INDEX = 0
+		end
+		GLOBAL_ENTITYOBJECT_INDEX = GLOBAL_ENTITYOBJECT_INDEX + 1
+		
+		love.graphics.draw(innerobj:getImage(), entObj:getPosX(), entObj:getPosY(), 0, 1, 1, 0, 0, 0, 0)
 	end
 end
 
---Changes the velocity of an object. Returns: Nothing
-function EntityObject.changeVelocity(objID, speed, direction)
-	local object = GLOBAL_ENTITYOBJECT_LIST[objID]
-	if object == nil then return end --Used in cases when the EntityObject list is cleared and an object is changing direction.
-	object["speed"] = speed
-	object["direction"] = direction
-end
-
---Finds the ID of an EntityObject by indexing the GLOBAL_ENTITYOBJECT_LIST with the given EntityObject. Returns: Integer or Nil
-function EntityObject.getIDByClass(class)
+--Finds an EntityObject using a given ID. Returns: Integer or Nil
+function EntityObject.getEntityObjectByID(id)
 	for i, ent in ipairs(GLOBAL_ENTITYOBJECT_LIST) do
-		if ent == class then
-			return i
+		if ent:getID() == id then
+			return ent
 		end
 	end
 	return nil
 end
 
---Finds the name of an EntityObject with the object's ID based on where it is stored in the EntityObject list. Returns: String or Nil
-function EntityObject.getEntityObjectByID(objectID)
-	return EntityObject[objectID]
+--Finds the EntityObject in the EntityObject list using an EntityObject. Returns EntityObject or Nil
+function EntityObject.getEntityObjectByEntityObject(class)
+	for i, ent in ipairs(GLOBAL_ENTITYOBJECT_LIST) do
+		if ent == class then
+			return ent
+		end
+	end
+	return nil
 end
 
---Finds a given attribute of an EntityObject and returns it. Returns: String, Integer, Object or Nil
-function EntityObject.getAttribute(attr, obj)
-	if attr == "object" then
-		return obj["obj"]
-	end
-	if attr == "posx" then
-		return obj["posx"]
-	end
-	if attr == "posy" then
-		return obj["posy"]
-	end
-	if attr == "speed" then
-		return obj["speed"]
-	end
-	if attr == "direction" then
-		return obj["direction"]
-	end
-	if attr == "begposx" then
-		return obj["begposx"]
-	end
-	if attr == "begposy" then
-		return obj["begposy"]
-	end
+
+--ENTITYOBJECT ATTRIBUTE GETTERS/SETTERS
+--Gets or sets an attribute of an object. Returns: Attribute or Nil
+function EntityObject:getObject()
+	if not self == GLOBAL_ENTITYOBJECT_LIST[self:getID()] then print("WARNING: An EntityObject is not synced to the object list! This may cause problems!") end
+	return self["object"]
+end
+	
+function EntityObject:getPosX()
+	if not self == GLOBAL_ENTITYOBJECT_LIST[self:getID()] then print("WARNING: An EntityObject is not synced to the object list! This may cause problems!") end
+	return self["posx"]
+end	
+	
+function EntityObject:getPosY()
+	if not self == GLOBAL_ENTITYOBJECT_LIST[self:getID()] then print("WARNING: An EntityObject is not synced to the object list! This may cause problems!") end
+	return self["posy"]
+end
+
+function EntityObject:getSpeed()
+	if not self == GLOBAL_ENTITYOBJECT_LIST[self:getID()] then print("WARNING: An EntityObject is not synced to the object list! This may cause problems!") end
+	return self["speed"]
+end
+
+function EntityObject:getDirection()
+	if not self == GLOBAL_ENTITYOBJECT_LIST[self:getID()] then print("WARNING: An EntityObject is not synced to the object list! This may cause problems!") end
+	return self["direction"]
+end
+
+function EntityObject:getID()
+	return self["id"]
+end
+
+function EntityObject:setObject(attr)
+	local obj = EntityObject.getEntityObjectByEntityObject(self)
+	obj["object"] = attr
+	self["object"] = attr
+end
+	
+function EntityObject:setPosX(attr)
+	local obj = EntityObject.getEntityObjectByEntityObject(self)
+	obj["posx"] = attr
+	self["posx"] = attr
+end	
+	
+function EntityObject:setPosY(attr)
+	local obj = EntityObject.getEntityObjectByEntityObject(self)
+	obj["posy"] = attr
+	self["posy"] = attr
+end
+
+function EntityObject:setSpeed(attr)
+	local obj = EntityObject.getEntityObjectByEntityObject(self)
+	obj["speed"] = attr
+	self["speed"] = attr
+end
+
+function EntityObject:setDirection(attr)
+	local obj = EntityObject.getEntityObjectByEntityObject(self)
+	obj["direction"] = attr
+	self["direction"] = attr
 end

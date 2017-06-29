@@ -1,7 +1,10 @@
 --utils.lua
---v0.9.1
+--v1.6.9
 --Author: Connor Wojtak
 --Purpose: This utility provides a variety of different functions not relating to a certain class.
+
+--Global Variables
+WINDOW_WIDTH, WINDOW_HEIGHT = love.window.getDesktopDimensions(1)
 
 --Gets the length of a table. Returns: Integer
 function getTableLength(aTable)

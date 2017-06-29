@@ -1,21 +1,18 @@
 --level_helper.lua
---v0.9.1
+--v1.6.9
 --Author: Connor Wojtak
 --Purpose: A utility to load levels, their attributes, and their backgrounds, and turn them into
 --lists containing those attributes. This file also contains functions for reading the Level lists.
 
 --Imports
-JSON_READER = require("utils/json/json")
-UTILS = require("utils/utils")
-OBJECT_HELPER = require("utils/object_helper")
+local JSON_READER = require("utils/json/json")
+local UTILS = require("utils/utils")
+local OBJECT_HELPER = require("utils/object_helper")
+local SOUND_HELPER = require("utils/sound_helper")
 
 --Global Variables
 GLOBAL_LEVEL_LIST = {}
 GLOBAL_LEVEL_INDEX = 0
-
---Directory
-WORKING_DIRECTORY = love.filesystem.getRealDirectory("objects/computer.json")
-local open = io.open
 
 --Classes
 Level = {}
@@ -23,7 +20,6 @@ Level = {}
 --Global Variables
 LAST_LEVEL = nil
 UPDATE_BACKGROUND = false
-WINDOW_WIDTHB, WINDOW_HEIGHTB = love.window.getDesktopDimensions(1)
 
 --Finds and reads all of the JSON files under the "levels/" folder. Returns: List
 function find_levels()
@@ -32,11 +28,9 @@ function find_levels()
 	for i, dir in ipairs(JSONDirectory) do
 		if love.filesystem.isFile("levels/" .. dir) == true then
 			if string.find(dir, ".json") then
-			    local file = open(WORKING_DIRECTORY .. "/levels/" .. dir, "rb")
-				if not file then return nil end
-				local content = file:read "*a"
+			    local content = love.filesystem.read("levels/" .. dir)
+				if not content then print("ERROR: No level files loaded. If you are using levels, this will cause problems.") return nil end
 				table.insert(returnList, content)
-				file:close()
 			end
 		end
 	end
@@ -53,6 +47,7 @@ end
 --Called on startup. Returns: Nothing
 function Level.start()
 	local levels = find_levels()
+	if levels == nil or levels == {} then return end
 	for i, obj in ipairs(levels) do
 		local name, music, background = create_level_para(obj)
 		local level = Level.new(name, music, background)
@@ -69,15 +64,15 @@ end
 
 --Starts a new level. Returns: Nothing
 function Level.newLevel(level)
-	sound = love.audio.newSource(level["music"])
+	sound = level["music"]
 	LAST_LEVEL = {lvl = level, snd = sound, background = level["background"]}
-	love.audio.play(sound)
+	Sound.play(sound)
 end
 
 --Stops the current running level. Returns: Nothing
 function Level.stop()
 	local level = LAST_LEVEL
-	love.audio.stop(level["snd"])
+	Sound.stop(Sound.getIDByName(level["snd"]))
 	GLOBAL_ENTITYOBJECT_LIST = {}
 	LAST_LEVEL = nil
 end
@@ -100,6 +95,16 @@ end
 --Finds the name of an level with the level's ID based on where it is stored in the Level list. Returns: String or Nil
 function Level.getNameByID(levelID)
 	return Level[levelID]
+end
+
+--Finds the name of an level with the level's ID based on where it is stored in the Level list. Returns: String or Nil
+function Level.getClassByName(name)
+	for i, lvl in ipairs(GLOBAL_LEVEL_LIST) do
+		if string.find(lvl["name"], name) then
+			return lvl
+		end
+	end
+	return nil
 end
 
 --Finds a given attribute of an level and returns it. Returns: String, Integer, Image or Nil

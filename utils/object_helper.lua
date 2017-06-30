@@ -1,5 +1,5 @@
 --object_helper.lua
---v1.7.3
+--v1.7.8
 --Author: Connor Wojtak
 --Purpose: A utility to load and create objects, their attributes, and their sprites. This file also contains functions for reading attributes from Objects and EntityObjects.
 
@@ -85,37 +85,37 @@ end
 --OBJECT ATTRIBUTE GETTERS/SETTERS
 --Gets or sets an attribute of an Object. Returns: Attribute or Nil
 function Object:getName()
-	if not self == GLOBAL_OBJECT_LIST[self:getID()] then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
+	if not self == Object.getObjectByID(self:getID()) then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
 	return self["name"]
 end
 	
 function Object:getImage()
-	if not self == GLOBAL_OBJECT_LIST[self:getID()] then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
+	if not self == Object.getObjectByID(self:getID()) then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
 	return self["image"]
 end	
 	
 function Object:getSize()
-	if not self == GLOBAL_OBJECT_LIST[self:getID()] then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
+	if not self == Object.getObjectByID(self:getID()) then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
 	return self["size"]
 end
 
 function Object:getEffect()
-	if not self == GLOBAL_OBJECT_LIST[self:getID()] then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
+	if not self == Object.getObjectByID(self:getID()) then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
 	return self["effect"]
 end
 
 function Object:getMinEffect()
-	if not self == GLOBAL_OBJECT_LIST[self:getID()] then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
+	if not self == Object.getObjectByID(self:getID()) then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
 	return self["mineffect"]
 end
 
 function Object:getMaxEffect()
-	if not self == GLOBAL_OBJECT_LIST[self:getID()] then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
+	if not self == Object.getObjectByID(self:getID()) then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
 	return self["maxeffect"]
 end
 
 function Object:getFlags()
-	if not self == GLOBAL_OBJECT_LIST[self:getID()] then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
+	if not self == Object.getObjectByID(self:getID()) then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
 	return self["flags"]
 end
 
@@ -124,49 +124,49 @@ function Object:getID()
 end
 
 function Object:setName(attr)
-	local obj = GLOBAL_OBJECT_LIST[self:getID()]
+	local obj = Object.getObjectByID(self:getID())
 	if obj == nil then return end
 	obj["name"] = attr
 	self["name"] = attr
 end
 	
 function Object:setImage(attr)
-	local obj = GLOBAL_OBJECT_LIST[self:getID()]
+	local obj = Object.getObjectByID(self:getID())
 	if obj == nil then return end
 	obj["image"] = attr
 	self["image"] = attr
 end	
 	
 function Object:setSize(attr)
-	local obj = GLOBAL_OBJECT_LIST[self:getID()]
+	local obj = Object.getObjectByID(self:getID())
 	if obj == nil then return end
 	obj["size"] = attr
 	self["size"] = attr
 end
 
 function Object:setEffect(attr)
-	local obj = GLOBAL_OBJECT_LIST[self:getID()]
+	local obj = Object.getObjectByID(self:getID())
 	if obj == nil then return end
 	obj["effect"] = attr
 	self["effect"] = attr
 end
 
 function Object:setMinEffect(attr)
-	local obj = GLOBAL_OBJECT_LIST[self:getID()]
+	local obj = Object.getObjectByID(self:getID())
 	if obj == nil then return end
 	obj["mineffect"] = attr
 	self["mineffect"] = attr
 end
 
 function Object:setMaxEffect(attr)
-	local obj = GLOBAL_OBJECT_LIST[self:getID()]
+	local obj = Object.getObjectByID(self:getID())
 	if obj == nil then return end
 	obj["maxeffect"] = attr
 	self["maxeffect"] = attr
 end
 
 function Object:setFlags(attr)
-	local obj = GLOBAL_OBJECT_LIST[self:getID()]
+	local obj = Object.getObjectByID(self:getID())
 	if obj == nil then return end
 	obj["flags"] = attr
 	self["flags"] = attr
@@ -257,27 +257,27 @@ end
 --ENTITYOBJECT ATTRIBUTE GETTERS/SETTERS
 --Gets or sets an attribute of an object. Returns: Attribute or Nil
 function EntityObject:getObject()
-	if not self == GLOBAL_ENTITYOBJECT_LIST[self:getID()] then print("WARNING: An EntityObject is not synced to the object list! This may cause problems!") end
+	if not self == EntityObject.getEntityObjectByID(self:getID()) then print("WARNING: An EntityObject is not synced to the object list! This may cause problems!") end
 	return self["object"]
 end
 	
 function EntityObject:getPosX()
-	if not self == GLOBAL_ENTITYOBJECT_LIST[self:getID()] then print("WARNING: An EntityObject is not synced to the object list! This may cause problems!") end
+	if not self == EntityObject.getEntityObjectByID(self:getID()) then print("WARNING: An EntityObject is not synced to the object list! This may cause problems!") end
 	return self["posx"]
 end	
 	
 function EntityObject:getPosY()
-	if not self == GLOBAL_ENTITYOBJECT_LIST[self:getID()] then print("WARNING: An EntityObject is not synced to the object list! This may cause problems!") end
+	if not self == EntityObject.getEntityObjectByID(self:getID()) then print("WARNING: An EntityObject is not synced to the object list! This may cause problems!") end
 	return self["posy"]
 end
 
 function EntityObject:getSpeed()
-	if not self == GLOBAL_ENTITYOBJECT_LIST[self:getID()] then print("WARNING: An EntityObject is not synced to the object list! This may cause problems!") end
+	if not self == EntityObject.getEntityObjectByID(self:getID()) then print("WARNING: An EntityObject is not synced to the object list! This may cause problems!") end
 	return self["speed"]
 end
 
 function EntityObject:getDirection()
-	if not self == GLOBAL_ENTITYOBJECT_LIST[self:getID()] then print("WARNING: An EntityObject is not synced to the object list! This may cause problems!") end
+	if not self == EntityObject.getEntityObjectByID(self:getID()) then print("WARNING: An EntityObject is not synced to the object list! This may cause problems!") end
 	return self["direction"]
 end
 

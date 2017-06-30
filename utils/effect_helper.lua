@@ -1,5 +1,5 @@
 --effect_helper.lua
---v1.7.3
+--v1.7.8
 --Author: Connor Wojtak
 --Purpose: A utility to add animated effects to an EntityObject.
 
@@ -84,22 +84,22 @@ end
 --EFFECT ATTRIBUTE GETTERS/SETTERS
 --Gets or sets an attribute of an Effect. Returns: Attribute or Nil
 function Effect:getName()
-	if not self == GLOBAL_EFFECT_LIST[self:getID()] then print("WARNING: An Effect is not synced to the effect list! This may cause problems!") end
+	if not self == Effect.getEffectByID(self:getID()) then print("WARNING: An Effect is not synced to the effect list! This may cause problems!") end
 	return self["name"]
 end
 	
 function Effect:getImage1()
-	if not self == GLOBAL_EFFECT_LIST[self:getID()] then print("WARNING: An Effect is not synced to the effect list! This may cause problems!") end
+	if not self == Effect.getEffectByID(self:getID()) then print("WARNING: An Effect is not synced to the effect list! This may cause problems!") end
 	return self["image1"]
 end	
 	
 function Effect:getImage2()
-	if not self == GLOBAL_EFFECT_LIST[self:getID()] then print("WARNING: An Effect is not synced to the effect list! This may cause problems!") end
+	if not self == Effect.getEffectByID(self:getID()) then print("WARNING: An Effect is not synced to the effect list! This may cause problems!") end
 	return self["image2"]
 end
 
 function Effect:getImage3()
-	if not self == GLOBAL_EFFECT_LIST[self:getID()] then print("WARNING: An Effect is not synced to the effect list! This may cause problems!") end
+	if not self == Effect.getEffectByID(self:getID()) then print("WARNING: An Effect is not synced to the effect list! This may cause problems!") end
 	return self["image3"]
 end
 
@@ -108,28 +108,28 @@ function Effect:getID()
 end
 
 function Effect:setName(attr)
-	local obj = GLOBAL_EFFECT_LIST[self:getID()]
+	local obj = Effect.getEffectByID(self:getID())
 	if obj == nil then return end
 	obj["name"] = attr
 	self["name"] = attr
 end
 	
 function Effect:setImage1(attr)
-	local obj = GLOBAL_EFFECT_LIST[self:getID()]
+	local obj = Effect.getEffectByID(self:getID())
 	if obj == nil then return end
 	obj["image1"] = attr
 	self["image1"] = attr
 end	
 	
 function Effect:setImage2(attr)
-	local obj = GLOBAL_EFFECT_LIST[self:getID()]
+	local obj = Effect.getEffectByID(self:getID())
 	if obj == nil then return end
 	obj["image2"] = attr
 	self["image2"] = attr
 end
 
 function Effect:setImage3(attr)
-	local obj = GLOBAL_EFFECT_LIST[self:getID()]
+	local obj = Effect.getEffectByID(self:getID())
 	if obj == nil then return end
 	obj["image3"] = attr
 	self["image3"] = attr
@@ -227,47 +227,47 @@ end
 --ENTITYEFFECT ATTRIBUTE GETTERS/SETTERS
 --Gets or sets an attribute of an EntityEffect. Returns: Attribute or Nil
 function EntityEffect:getName()
-	if not self == GLOBAL_ENTITYEFFECT_LIST[self:getID()] then print("WARNING: An EntityEffect is not synced to the entity effect list! This may cause problems!") end
+	if not self == EntityEffect.getEntityEffectByID(self:getID()) then print("WARNING: An EntityEffect is not synced to the entity effect list! This may cause problems!") end
 	return self["name"]
 end
 	
 function EntityEffect:getImage1()
-	if not self == GLOBAL_EFFECT_LIST[self:getID()] then print("WARNING: An EntityEffect is not synced to the entity effect list! This may cause problems!") end
+	if not self == EntityEffect.getEntityEffectByID(self:getID()) then print("WARNING: An EntityEffect is not synced to the entity effect list! This may cause problems!") end
 	return self["image1"]
 end	
 	
 function EntityEffect:getImage2()
-	if not self == GLOBAL_EFFECT_LIST[self:getID()] then print("WARNING: An EntityEffect is not synced to the entity effect list! This may cause problems!") end
+	if not self == EntityEffect.getEntityEffectByID(self:getID()) then print("WARNING: An EntityEffect is not synced to the entity effect list! This may cause problems!") end
 	return self["image2"]
 end
 
 function EntityEffect:getImage3()
-	if not self == GLOBAL_EFFECT_LIST[self:getID()] then print("WARNING: An EntityEffect is not synced to the entity effect list! This may cause problems!") end
+	if not self == EntityEffect.getEntityEffectByID(self:getID()) then print("WARNING: An EntityEffect is not synced to the entity effect list! This may cause problems!") end
 	return self["image3"]
 end
 
 function EntityEffect:getPosX()
-	if not self == GLOBAL_EFFECT_LIST[self:getID()] then print("WARNING: An EntityEffect is not synced to the entity effect list! This may cause problems!") end
+	if not self == EntityEffect.getEntityEffectByID(self:getID()) then print("WARNING: An EntityEffect is not synced to the entity effect list! This may cause problems!") end
 	return self["posx"]
 end
 
 function EntityEffect:getPosY()
-	if not self == GLOBAL_EFFECT_LIST[self:getID()] then print("WARNING: An EntityEffect is not synced to the entity effect list! This may cause problems!") end
+	if not self == EntityEffect.getEntityEffectByID(self:getID()) then print("WARNING: An EntityEffect is not synced to the entity effect list! This may cause problems!") end
 	return self["posy"]
 end
 
 function EntityEffect:getImageState()
-	if not self == GLOBAL_EFFECT_LIST[self:getID()] then print("WARNING: An EntityEffect is not synced to the entity effect list! This may cause problems!") end
+	if not self == EntityEffect.getEntityEffectByID(self:getID()) then print("WARNING: An EntityEffect is not synced to the entity effect list! This may cause problems!") end
 	return self["imgstate"]
 end
 
 function EntityEffect:getEntityObject()
-	if not self == GLOBAL_ENTITYEFFECT_LIST[self:getID()] then print("WARNING: An EntityEffect is not synced to the entity effect list! This may cause problems!") end
+	if not self == EntityEffect.getEntityEffectByID(self:getID()) then print("WARNING: An EntityEffect is not synced to the entity effect list! This may cause problems!") end
 	return self["entobj"]
 end
 
 function EntityEffect:getEffectAmount()
-	if not self == GLOBAL_ENTITYEFFECT_LIST[self:getID()] then print("WARNING: An EntityEffect is not synced to the entity effect list! This may cause problems!") end
+	if not self == EntityEffect.getEntityEffectByID(self:getID()) then print("WARNING: An EntityEffect is not synced to the entity effect list! This may cause problems!") end
 	return self["am_effect"]
 end
 
@@ -276,63 +276,63 @@ function EntityEffect:getID()
 end
 
 function EntityEffect:setName(attr)
-	local obj = GLOBAL_ENTITYEFFECT_LIST[self:getID()]
+	local obj = EntityEffect.getEntityEffectByID(self:getID())
 	if obj == nil then return end
 	obj["name"] = attr
 	self["name"] = attr
 end
 	
 function EntityEffect:setImage1(attr)
-	local obj = GLOBAL_ENTITYEFFECT_LIST[self:getID()]
+	local obj = EntityEffect.getEntityEffectByID(self:getID())
 	if obj == nil then return end
 	obj["image1"] = attr
 	self["image1"] = attr
 end	
 	
 function EntityEffect:setImage2(attr)
-	local obj = GLOBAL_ENTITYEFFECT_LIST[self:getID()]
+	local obj = EntityEffect.getEntityEffectByID(self:getID())
 	if obj == nil then return end
 	obj["image2"] = attr
 	self["image2"] = attr
 end
 
 function EntityEffect:setImage3(attr)
-	local obj = GLOBAL_ENTITYEFFECT_LIST[self:getID()]
+	local obj = EntityEffect.getEntityEffectByID(self:getID())
 	if obj == nil then  return end
 	obj["image3"] = attr
 	self["image3"] = attr
 end
 
 function EntityEffect:setPosX(attr)
-	local obj = GLOBAL_ENTITYEFFECT_LIST[self:getID()]
+	local obj = EntityEffect.getEntityEffectByID(self:getID())
 	if obj == nil then return end
 	obj["posx"] = attr
 	self["posx"] = attr
 end
 
 function EntityEffect:setPosY(attr)
-	local obj = GLOBAL_ENTITYEFFECT_LIST[self:getID()]
+	local obj = EntityEffect.getEntityEffectByID(self:getID())
 	if obj == nil then return end
 	obj["posy"] = attr
 	self["posy"] = attr
 end
 
 function EntityEffect:setImageState(attr)
-	local obj = GLOBAL_ENTITYEFFECT_LIST[self:getID()]
+	local obj = EntityEffect.getEntityEffectByID(self:getID())
 	if obj == nil then  return end
 	obj["imgstate"] = attr
 	self["imgstate"] = attr
 end
 
 function EntityEffect:setEntityObject(attr)
-	local obj = GLOBAL_ENTITYEFFECT_LIST[self:getID()]
+	local obj = EntityEffect.getEntityEffectByID(self:getID())
 	if obj == nil then return end
 	obj["entobj"] = attr
 	self["entobj"] = attr
 end
 
 function EntityEffect:setEffectAmount(attr)
-	local obj = GLOBAL_ENTITYEFFECT_LIST[self:getID()]
+	local obj = EntityEffect.getEntityEffectByID(self:getID())
 	if obj == nil then return end
 	obj["am_effect"] = attr
 	self["am_effect"] = attr

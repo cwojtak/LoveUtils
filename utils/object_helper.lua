@@ -1,5 +1,5 @@
 --object_helper.lua
---v1.6.9
+--v1.7.3
 --Author: Connor Wojtak
 --Purpose: A utility to load and create objects, their attributes, and their sprites. This file also contains functions for reading attributes from Objects and EntityObjects.
 
@@ -65,7 +65,7 @@ end
 --Finds an Object in the global list using a given name. Returns: Object or Nil
 function Object.getObjectByName(objectname)
 	for i, obj in ipairs(GLOBAL_OBJECT_LIST) do
-		if string.find(obj:getName(), objectname) then
+		if obj:getName() == objectname then
 			return obj
 		end
 	end
@@ -83,7 +83,7 @@ function Object.getObjectByID(objectID)
 end
 
 --OBJECT ATTRIBUTE GETTERS/SETTERS
---Gets or sets an attribute of an object. Returns: Attribute or Nil
+--Gets or sets an attribute of an Object. Returns: Attribute or Nil
 function Object:getName()
 	if not self == GLOBAL_OBJECT_LIST[self:getID()] then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
 	return self["name"]
@@ -114,7 +114,6 @@ function Object:getMaxEffect()
 	return self["maxeffect"]
 end
 
-
 function Object:getFlags()
 	if not self == GLOBAL_OBJECT_LIST[self:getID()] then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
 	return self["flags"]
@@ -126,42 +125,49 @@ end
 
 function Object:setName(attr)
 	local obj = GLOBAL_OBJECT_LIST[self:getID()]
+	if obj == nil then return end
 	obj["name"] = attr
 	self["name"] = attr
 end
 	
 function Object:setImage(attr)
 	local obj = GLOBAL_OBJECT_LIST[self:getID()]
+	if obj == nil then return end
 	obj["image"] = attr
 	self["image"] = attr
 end	
 	
 function Object:setSize(attr)
 	local obj = GLOBAL_OBJECT_LIST[self:getID()]
+	if obj == nil then return end
 	obj["size"] = attr
 	self["size"] = attr
 end
 
 function Object:setEffect(attr)
 	local obj = GLOBAL_OBJECT_LIST[self:getID()]
+	if obj == nil then return end
 	obj["effect"] = attr
 	self["effect"] = attr
 end
 
 function Object:setMinEffect(attr)
 	local obj = GLOBAL_OBJECT_LIST[self:getID()]
+	if obj == nil then return end
 	obj["mineffect"] = attr
 	self["mineffect"] = attr
 end
 
 function Object:setMaxEffect(attr)
 	local obj = GLOBAL_OBJECT_LIST[self:getID()]
+	if obj == nil then return end
 	obj["maxeffect"] = attr
 	self["maxeffect"] = attr
 end
 
 function Object:setFlags(attr)
 	local obj = GLOBAL_OBJECT_LIST[self:getID()]
+	if obj == nil then return end
 	obj["flags"] = attr
 	self["flags"] = attr
 end
@@ -182,7 +188,7 @@ function EntityObject:new(obj, begposx, begposy, begspeed, begdir)
 	
 	if obj_effect == nil or obj_effect == "" then return eobj end
 	
-	EntityEffect.new(GLOBAL_EFFECT_LIST[Effect.getIDByName(obj_effect)], begposx, begposy, 1, obj:getMinEffect(), obj:getMaxEffect(), ID) --------------------TODO: FIX ENTITYEFFECTS
+	EntityEffect:new(Effect.getEffectByName(obj_effect), begposx, begposy, 1, obj:getMinEffect(), obj:getMaxEffect(), eobj)
 	
 	return eobj
 end
@@ -207,13 +213,13 @@ function EntityObject.updateObjects()
 			if entObj:getDirection() == "left" then
 				entObj:setPosX(entObj:getPosX() - entObj:getSpeed())
 			end
-			if entObj["direction"] == "right" then
+			if entObj:getDirection() == "right" then
 				entObj:setPosX(entObj:getPosX() + entObj:getSpeed())
 			end
-			if entObj["direction"] == "up" then
+			if entObj:getDirection() == "up" then
 				entObj:setPosY(entObj:getPosY() - entObj:getSpeed())
 			end
-			if entObj["direction"] == "down" then
+			if entObj:getDirection() == "down" then
 				entObj:setPosY(entObj:getPosY() + entObj:getSpeed())
 			end
 		end
@@ -281,30 +287,35 @@ end
 
 function EntityObject:setObject(attr)
 	local obj = EntityObject.getEntityObjectByEntityObject(self)
+	if obj == nil then return end
 	obj["object"] = attr
 	self["object"] = attr
 end
 	
 function EntityObject:setPosX(attr)
 	local obj = EntityObject.getEntityObjectByEntityObject(self)
+	if obj == nil then return end
 	obj["posx"] = attr
 	self["posx"] = attr
 end	
 	
 function EntityObject:setPosY(attr)
 	local obj = EntityObject.getEntityObjectByEntityObject(self)
+	if obj == nil then return end
 	obj["posy"] = attr
 	self["posy"] = attr
 end
 
 function EntityObject:setSpeed(attr)
 	local obj = EntityObject.getEntityObjectByEntityObject(self)
+	if obj == nil then return end
 	obj["speed"] = attr
 	self["speed"] = attr
 end
 
 function EntityObject:setDirection(attr)
 	local obj = EntityObject.getEntityObjectByEntityObject(self)
+	if obj == nil then return end
 	obj["direction"] = attr
 	self["direction"] = attr
 end

@@ -1,14 +1,14 @@
 --effect_helper.lua
---v1.6.9
+--v1.7.3
 --Author: Connor Wojtak
---Purpose: A utility to add animated effects to an object.
+--Purpose: A utility to add animated effects to an EntityObject.
 
 --Imports
 local JSON_READER = require("utils/json/json")
 local UTILS = require("utils/utils")
 
 --Classes
-Effect = {}
+Effect = {name=nil, image1=nil, image2=nil, image3=nil}
 EntityEffect = {}
 
 --Global Variables
@@ -52,85 +52,120 @@ function Effect.start()
 	if effects == nil or effects == {} then return end
 	for i, eff in ipairs(effects) do
 		local name, image1, image2, image3  = create_effect_para(eff)
-		local effect = Effect.new(name, image1, image2, image3)
+		local effect = Effect:new(name, image1, image2, image3)
 		table.insert(GLOBAL_EFFECT_LIST, effect)
 	end
 end
 
---Creates a new Effect list, which will eventually be stored in a global list. Returns: List
-function Effect.new(inname, inimage1, inimage2, inimage3)
-	table.insert(Effect, inname)
-	local inid = Effect.getIDByName(inname)
-	return {name = inname, image1 = inimage1, image2 = inimage2, image3 = inimage3}
-end
-
---Draws an effect and applies any effects to it. Returns: Nothing
-function Effect.draw(eff, posx, posy, sx, sy)
-	local eff_img = Effect.getAttribute("image", eff)
-	love.graphics.draw(eff_img, posx, posy, 0, sx, sy, 0, 0, 0, 0)
+--Creates a new Effect, which will be stored in a list. Returns: Effect
+function Effect:new(inname, inimage1, inimage2, inimage3)
+	local inid = getTableLength(GLOBAL_EFFECT_LIST)
+	local obj = {name = inname, image1 = inimage1, image2 = inimage2, image3 = inimage3, id = inid}
+	setmetatable(obj, self)
+    self.__index = self
+    return obj
 end
 
 --Finds the ID of an effect with the effect's name based on where it is stored in the Effect list. Returns: Integer or Nil
-function Effect.getIDByName(effectname)
-	for i, eff in ipairs(Effect) do
-		if string.find(eff, effectname) then
-			return i
+function Effect.getEffectByName(effectname)
+	for i, eff in ipairs(GLOBAL_EFFECT_LIST) do
+		if eff:getName() == effectname then
+			return eff
 		end
 	end
 	return nil
 end
 
 --Finds the class of an effect with the effect's ID based on where it is stored in the Effect list. Returns: String or Nil
-function Effect.getClassByID(effectID)
-	return Effect[effectID]
+function Effect.getEffectByID(effectID)
+	return GLOBAL_EFFECT_LIST[effectID]
 end
 
---Finds a given attribute of an effect and returns it. Returns: String, Integer, Image or Nil
-function Effect.getAttribute(attr, eff)
-	if attr == "name" then
-		return eff["name"]
-	end
-	if attr == "image" then
-		return eff["image"]
-	end
-	if attr == "special" then
-		return eff["special"]
-	end
-	if attr == "flags" then
-		return eff["flags"]
-	end
-	if attr == "id" then
-		return eff["id"]
-	end
+--EFFECT ATTRIBUTE GETTERS/SETTERS
+--Gets or sets an attribute of an Effect. Returns: Attribute or Nil
+function Effect:getName()
+	if not self == GLOBAL_EFFECT_LIST[self:getID()] then print("WARNING: An Effect is not synced to the effect list! This may cause problems!") end
+	return self["name"]
+end
+	
+function Effect:getImage1()
+	if not self == GLOBAL_EFFECT_LIST[self:getID()] then print("WARNING: An Effect is not synced to the effect list! This may cause problems!") end
+	return self["image1"]
+end	
+	
+function Effect:getImage2()
+	if not self == GLOBAL_EFFECT_LIST[self:getID()] then print("WARNING: An Effect is not synced to the effect list! This may cause problems!") end
+	return self["image2"]
+end
+
+function Effect:getImage3()
+	if not self == GLOBAL_EFFECT_LIST[self:getID()] then print("WARNING: An Effect is not synced to the effect list! This may cause problems!") end
+	return self["image3"]
+end
+
+function Effect:getID()
+	return self["id"]
+end
+
+function Effect:setName(attr)
+	local obj = GLOBAL_EFFECT_LIST[self:getID()]
+	if obj == nil then return end
+	obj["name"] = attr
+	self["name"] = attr
+end
+	
+function Effect:setImage1(attr)
+	local obj = GLOBAL_EFFECT_LIST[self:getID()]
+	if obj == nil then return end
+	obj["image1"] = attr
+	self["image1"] = attr
+end	
+	
+function Effect:setImage2(attr)
+	local obj = GLOBAL_EFFECT_LIST[self:getID()]
+	if obj == nil then return end
+	obj["image2"] = attr
+	self["image2"] = attr
+end
+
+function Effect:setImage3(attr)
+	local obj = GLOBAL_EFFECT_LIST[self:getID()]
+	if obj == nil then return end
+	obj["image3"] = attr
+	self["image3"] = attr
 end
 
 --ENTITYEFFECT CLASS
---Creates a new EntityEffect list. Returns: List, Integer
-function EntityEffect.new(eff, inposx, inposy, startimg, mineffect, maxeffect, EID)
+--Creates a new EntityEffect. Returns: EntityEffect, Integer
+function EntityEffect:new(eff, inposx, inposy, startimg, mineffect, maxeffect, inentobj)
 	local rand = math.random(mineffect, maxeffect)
-	table.insert(EntityEffect, eff)
-	table.insert(GLOBAL_ENTITYEFFECT_LIST, {name = eff["name"], image1 = eff["image1"], image2 = eff["image2"], image3 = eff["image3"], posx = inposx, posy = inposy, imgstate = startimg, am_effect = rand, ent_id =  EID})
 	local ID = getTableLength(GLOBAL_ENTITYEFFECT_LIST)
-	return {name = eff["name"], image1 = eff["image1"], image2 = eff["image2"], image3 = eff["image3"], posx = inposx, posy = inposy, imgstate = startimg, am_effect = rand, ent_id =  EID}, ID
+	local eobj = {name = eff:getName(), image1 = eff:getImage1(), image2 = eff:getImage2(), image3 = eff:getImage3(), posx = inposx, posy = inposy, imgstate = startimg, am_effect = rand, id = ID, entobj=inentobj}
+	setmetatable(eobj, self)
+    self.__index = self
+	table.insert(GLOBAL_ENTITYEFFECT_LIST, eobj)
+	return eobj
 end
 
 --Called by love.draw() to update the effects. Returns: Nothing
 function EntityEffect.updateEffects()
 	for i, eff in ipairs(GLOBAL_ENTITYEFFECT_LIST) do
-		local entity_id = eff["ent_id"]
-		local entity_object = GLOBAL_ENTITYOBJECT_LIST[entity_id]
+		local entity_id = eff:getID()
+		
+		local entity_object = eff:getEntityObject()
 		if entity_object == nil then table.remove(GLOBAL_ENTITYEFFECT_LIST, i) return end -- Used when EntityObject is deleted. 
-		local object = entity_object["object"]
+		
+		local object = entity_object:getObject()
 		if object == nil then return end
 		
-		local size = object["size"]
+		local size = object:getSize()
 		
-		local entityposx = entity_object["posx"]
-		local entityposy = entity_object["posy"]
+		local entityposx = entity_object:getPosX()
+		local entityposy = entity_object:getPosY()
 		
 		if GLOBAL_ENTITYEFFECT_INDEX == 0 or GLOBAL_ENTITYEFFECT_INDEX == 15 or GLOBAL_ENTITYEFFECT_INDEX == 30 or GLOBAL_ENTITYEFFECT_INDEX == 45 or GLOBAL_ENTITYEFFECT_INDEX == 60 or GLOBAL_ENTITYEFFECT_INDEX == 75 then
 			local i = 0
-			while(i < eff["am_effect"]) do
+			while(i < eff:getEffectAmount()) do
 				GLOBAL_POSITION_LIST_X[i] = math.random(-size/8, size) * 2
 				GLOBAL_POSITION_LIST_Y[i] = math.random(-size/8, size) * 2
 				i = i + 1
@@ -138,30 +173,30 @@ function EntityEffect.updateEffects()
 		end
 		
 		i = 0
-		if eff["imgstate"] == 4 then eff["imgstate"] = 1 end
-		if eff["imgstate"] == 1 then
-			while(i ~= eff["am_effect"]) do
+		if eff:getImageState() == 4 then eff:setImageState(1) end
+		if eff:getImageState() == 1 then
+			while(i ~= eff:getEffectAmount()) do
 				if GLOBAL_POSITION_LIST_X[i] == nil or GLOBAL_POSITION_LIST_Y[i] == nil then return end
-				love.graphics.draw(eff["image1"], entityposx + GLOBAL_POSITION_LIST_X[i], entityposy + GLOBAL_POSITION_LIST_Y[i], 0, size/(size*8), size/(size*8), 0, 0, 0, 0)
+				love.graphics.draw(eff:getImage1(), entityposx + GLOBAL_POSITION_LIST_X[i], entityposy + GLOBAL_POSITION_LIST_Y[i], 0, size/(size*8), size/(size*8), 0, 0, 0, 0)
 				i = i + 1
 			end
 		end
-		if eff["imgstate"] == 2 then
+		if eff:getImageState() == 2 then
 			if GLOBAL_POSITION_LIST_X[i] == nil or GLOBAL_POSITION_LIST_Y[i] == nil then return end
-			while(i ~= eff["am_effect"]) do
-				love.graphics.draw(eff["image2"], entityposx + GLOBAL_POSITION_LIST_X[i], entityposy + GLOBAL_POSITION_LIST_Y[i], 0, size/(size*8), size/(size*8), 0, 0, 0, 0)
+			while(i ~= eff:getEffectAmount()) do
+				love.graphics.draw(eff:getImage2(), entityposx + GLOBAL_POSITION_LIST_X[i], entityposy + GLOBAL_POSITION_LIST_Y[i], 0, size/(size*8), size/(size*8), 0, 0, 0, 0)
 				i = i + 1
 			end
 		end
-		if eff["imgstate"] == 3 then
+		if eff:getImageState() == 3 then
 			if GLOBAL_POSITION_LIST_X[i] == nil or GLOBAL_POSITION_LIST_Y[i] == nil then return end
-			while(i ~= eff["am_effect"]) do
-				love.graphics.draw(eff["image3"], entityposx + GLOBAL_POSITION_LIST_X[i], entityposy + GLOBAL_POSITION_LIST_Y[i], 0, size/(size*8), size/(size*8), 0, 0, 0, 0)
+			while(i ~= eff:getEffectAmount()) do
+				love.graphics.draw(eff:getImage3(), entityposx + GLOBAL_POSITION_LIST_X[i], entityposy + GLOBAL_POSITION_LIST_Y[i], 0, size/(size*8), size/(size*8), 0, 0, 0, 0)
 				i = i + 1
 			end
 		end
 		if GLOBAL_ENTITYEFFECT_INDEX >= 75 then
-			eff["imgstate"] = eff["imgstate"] + 1
+			eff:setImageState(eff:getImageState() + 1)
 			GLOBAL_ENTITYEFFECT_INDEX = 0
 		end
   	GLOBAL_ENTITYEFFECT_INDEX = GLOBAL_ENTITYEFFECT_INDEX + 1
@@ -169,42 +204,136 @@ function EntityEffect.updateEffects()
 	collectgarbage()
 end
 
---Finds the ID of an EntityEffect by indexing the GLOBAL_ENTITYEFFECT_LIST with the given EntityEffect. Returns: Integer or Nil
-function EntityEffect.getIDByClass(class)
+--Finds the ID of an EntityEffect by indexing the EntityEffect list with the given ID. Returns: Integer or Nil
+function EntityEffect.getEntityEffectByID(ID)
 	for i, ent in ipairs(GLOBAL_ENTITYEFFECT_LIST) do
-		if ent == class then
-			return i
+		if ent:getID() == ID then
+			return ent
 		end
 	end
 	return nil
 end
 
---Finds the name of an EntityEffect with the effect's ID based on where it is stored in the EntityEffect list. Returns: String or Nil
-function EntityEffect.getEntityEffectByID(effID)
-	return EntityEffect[effID]
+--Finds the name of an EntityEffect with the effect's name based on where it is stored in the EntityEffect list. Returns: String or Nil
+function EntityEffect.getEntityEffectByName(name)
+	for i, eff in ipairs(GLOBAL_ENTITYEFFECT_LIST) do
+		if eff:getName() == name then
+			return eff
+		end
+	end
+	return nil
 end
 
---Finds a given attribute of an EntityEffect and returns it. Returns: String, Integer, effect or Nil
-function EntityEffect.getAttribute(attr, eff)
-	if attr == "name" then
-		return eff["name"]
-	end
-	if attr == "posx" then
-		return eff["posx"]
-	end
-	if attr == "posy" then
-		return eff["posy"]
-	end
-	if attr == "image1" then
-		return eff["image1"]
-	end
-	if attr == "image2" then
-		return eff["image2"]
-	end
-	if attr == "image3" then
-		return eff["image3"]
-	end
-	if attr == "imgstate" then
-		return eff["imgstate"]
-	end
+--ENTITYEFFECT ATTRIBUTE GETTERS/SETTERS
+--Gets or sets an attribute of an EntityEffect. Returns: Attribute or Nil
+function EntityEffect:getName()
+	if not self == GLOBAL_ENTITYEFFECT_LIST[self:getID()] then print("WARNING: An EntityEffect is not synced to the entity effect list! This may cause problems!") end
+	return self["name"]
+end
+	
+function EntityEffect:getImage1()
+	if not self == GLOBAL_EFFECT_LIST[self:getID()] then print("WARNING: An EntityEffect is not synced to the entity effect list! This may cause problems!") end
+	return self["image1"]
+end	
+	
+function EntityEffect:getImage2()
+	if not self == GLOBAL_EFFECT_LIST[self:getID()] then print("WARNING: An EntityEffect is not synced to the entity effect list! This may cause problems!") end
+	return self["image2"]
+end
+
+function EntityEffect:getImage3()
+	if not self == GLOBAL_EFFECT_LIST[self:getID()] then print("WARNING: An EntityEffect is not synced to the entity effect list! This may cause problems!") end
+	return self["image3"]
+end
+
+function EntityEffect:getPosX()
+	if not self == GLOBAL_EFFECT_LIST[self:getID()] then print("WARNING: An EntityEffect is not synced to the entity effect list! This may cause problems!") end
+	return self["posx"]
+end
+
+function EntityEffect:getPosY()
+	if not self == GLOBAL_EFFECT_LIST[self:getID()] then print("WARNING: An EntityEffect is not synced to the entity effect list! This may cause problems!") end
+	return self["posy"]
+end
+
+function EntityEffect:getImageState()
+	if not self == GLOBAL_EFFECT_LIST[self:getID()] then print("WARNING: An EntityEffect is not synced to the entity effect list! This may cause problems!") end
+	return self["imgstate"]
+end
+
+function EntityEffect:getEntityObject()
+	if not self == GLOBAL_ENTITYEFFECT_LIST[self:getID()] then print("WARNING: An EntityEffect is not synced to the entity effect list! This may cause problems!") end
+	return self["entobj"]
+end
+
+function EntityEffect:getEffectAmount()
+	if not self == GLOBAL_ENTITYEFFECT_LIST[self:getID()] then print("WARNING: An EntityEffect is not synced to the entity effect list! This may cause problems!") end
+	return self["am_effect"]
+end
+
+function EntityEffect:getID()
+	return self["id"]
+end
+
+function EntityEffect:setName(attr)
+	local obj = GLOBAL_ENTITYEFFECT_LIST[self:getID()]
+	if obj == nil then return end
+	obj["name"] = attr
+	self["name"] = attr
+end
+	
+function EntityEffect:setImage1(attr)
+	local obj = GLOBAL_ENTITYEFFECT_LIST[self:getID()]
+	if obj == nil then return end
+	obj["image1"] = attr
+	self["image1"] = attr
+end	
+	
+function EntityEffect:setImage2(attr)
+	local obj = GLOBAL_ENTITYEFFECT_LIST[self:getID()]
+	if obj == nil then return end
+	obj["image2"] = attr
+	self["image2"] = attr
+end
+
+function EntityEffect:setImage3(attr)
+	local obj = GLOBAL_ENTITYEFFECT_LIST[self:getID()]
+	if obj == nil then  return end
+	obj["image3"] = attr
+	self["image3"] = attr
+end
+
+function EntityEffect:setPosX(attr)
+	local obj = GLOBAL_ENTITYEFFECT_LIST[self:getID()]
+	if obj == nil then return end
+	obj["posx"] = attr
+	self["posx"] = attr
+end
+
+function EntityEffect:setPosY(attr)
+	local obj = GLOBAL_ENTITYEFFECT_LIST[self:getID()]
+	if obj == nil then return end
+	obj["posy"] = attr
+	self["posy"] = attr
+end
+
+function EntityEffect:setImageState(attr)
+	local obj = GLOBAL_ENTITYEFFECT_LIST[self:getID()]
+	if obj == nil then  return end
+	obj["imgstate"] = attr
+	self["imgstate"] = attr
+end
+
+function EntityEffect:setEntityObject(attr)
+	local obj = GLOBAL_ENTITYEFFECT_LIST[self:getID()]
+	if obj == nil then return end
+	obj["entobj"] = attr
+	self["entobj"] = attr
+end
+
+function EntityEffect:setEffectAmount(attr)
+	local obj = GLOBAL_ENTITYEFFECT_LIST[self:getID()]
+	if obj == nil then return end
+	obj["am_effect"] = attr
+	self["am_effect"] = attr
 end

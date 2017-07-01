@@ -1,1 +1,5 @@
+<<<<<<< HEAD
 { "name":"computer_evil" , "image":"computer_evil" , "size":"64" , "special":"" , "flags":"" , "min_effect":"0" , "max_effect":"0" }
+=======
+{ "name":"computer_evil" , "image":"computer_evil" , "size":"64" , "effect":"red_effect" , "flags":"" , "min_effect":"10" , "max_effect":"15" }
+>>>>>>> 69e2953524cf94c6a651a521aada35d35560a4c1

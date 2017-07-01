@@ -1,5 +1,1 @@
-<<<<<<< HEAD
 { "name":"computer" , "image":"computer" , "size":"64" , "special":"" , "flags":"" , "min_effect":"0" , "max_effect":"0" }
-=======
-{ "name":"computer" , "image":"computer" , "size":"64" , "effect":"" , "flags":"" , "min_effect":"0" , "max_effect":"0" }
->>>>>>> 69e2953524cf94c6a651a521aada35d35560a4c1

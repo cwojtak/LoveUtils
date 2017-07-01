@@ -1,5 +1,5 @@
 --level_helper.lua
---v1.7.8
+--v1.9.0
 --Author: Connor Wojtak
 --Purpose: A utility to load levels, their attributes, and their backgrounds, and turn them into
 --lists containing those attributes. This file also contains functions for reading the Level lists.
@@ -23,12 +23,12 @@ UPDATE_BACKGROUND = false
 
 --Finds and reads all of the JSON files under the "levels/" folder. Returns: List
 function find_levels()
-	local JSONDirectory = love.filesystem.getDirectoryItems("levels/")
+	local JSONDirectory = love.filesystem.getDirectoryItems(LEVEL_PATH)
 	local returnList = {}
 	for i, dir in ipairs(JSONDirectory) do
-		if love.filesystem.isFile("levels/" .. dir) == true then
+		if love.filesystem.isFile(LEVEL_PATH .. dir) == true then
 			if string.find(dir, ".json") then
-			    local content = love.filesystem.read("levels/" .. dir)
+			    local content = love.filesystem.read(LEVEL_PATH .. dir)
 				if not content then print("ERROR: No level files loaded. If you are using levels, this will cause problems.") return nil end
 				table.insert(returnList, content)
 			end
@@ -57,7 +57,7 @@ end
 
 --Creates a new Level. Returns: Level
 function Level:new(inname, inmusic, inbackground)
-	local inid = getTableLength(GLOBAL_LEVEL_LIST)
+	local inid = Utils.getTableLength(GLOBAL_LEVEL_LIST)
 	local obj = {name = inname, music = inmusic, background = inbackground, id = inid}
 	setmetatable(obj, self)
     self.__index = self

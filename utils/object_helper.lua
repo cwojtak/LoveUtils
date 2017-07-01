@@ -1,5 +1,5 @@
 --object_helper.lua
---v1.7.8
+--v1.9.0
 --Author: Connor Wojtak
 --Purpose: A utility to load and create objects, their attributes, and their sprites. This file also contains functions for reading attributes from Objects and EntityObjects.
 
@@ -18,14 +18,22 @@ GLOBAL_OBJECT_LIST = {}
 GLOBAL_ENTITYOBJECT_LIST = {}
 GLOBAL_ENTITYOBJECT_INDEX = 0
 
+function getLengthOfObjectList()
+	return Utils.getTableLength(GLOBAL_OBJECT_LIST)
+end
+
+function getLengthOfEntityObjectList()
+	return Utils.getTableLength(GLOBAL_ENTITYOBJECT_LIST)
+end
+
 --Finds and reads all of the JSON files under the "objects/" folder. Returns: List
 function find_objects()
-	local JSONDirectory = love.filesystem.getDirectoryItems("objects/")
+	local JSONDirectory = love.filesystem.getDirectoryItems(OBJECT_PATH)
 	local returnList = {}
 	for i, dir in ipairs(JSONDirectory) do
-		if love.filesystem.isFile("objects/" .. dir) == true then
+		if love.filesystem.isFile(OBJECT_PATH .. dir) == true then
 			if string.find(dir, ".json") then
-			    local content = love.filesystem.read("objects/" .. dir)
+			    local content = love.filesystem.read(OBJECT_PATH .. dir)
 				if not content then print("ERROR: No object files loaded. If you are using objects, this will cause problems.") return nil end
 				table.insert(returnList, content)
 			end
@@ -37,26 +45,35 @@ end
 --Decodes JSON data returns the parameters. Returns: String, LOVE Image
 function create_object_para(data) 
 	local decoded_data = json.decode(data)
-	return decoded_data["name"], love.graphics.newImage("sprites/" .. decoded_data["image"] .. ".jpg"), decoded_data["size"], decoded_data["effect"], decoded_data["flags"], decoded_data["min_effect"], decoded_data["max_effect"]
+	return decoded_data["name"], love.graphics.newImage(OBJECT_IMAGE_PATH .. decoded_data["image"] .. ".jpg"), decoded_data["size"], decoded_data["effect"], decoded_data["flags"], decoded_data["min_effect"], decoded_data["max_effect"]
 end
 
 --OBJECT CLASS
---Called on startup. Returns: Nothing
-function Object.start()
-	local objects = find_objects()
-	if objects == nil or objects == {} then return end
-	for i, obj in ipairs(objects) do
-		local name, image, size, effect, flags, min_effect, max_effect = create_object_para(obj)
-		local object = Object:new(name, image, size, effect, flags, min_effect, max_effect)
-		table.insert(GLOBAL_OBJECT_LIST, object)
+--Called by love.load() on startup. Uses a default JSON loading method, or a custom one. Returns: Nothing
+function Object.start(method, decoded_data)
+	if method == true and decoded_data ~= nil then
+		for i, obj in ipairs(decoded_data) do
+			local object = Object:new(obj)
+			table.insert(GLOBAL_OBJECT_LIST, object)
+		end
+	end
+
+	if method == false or method == nil then
+		local objects = find_objects()
+		if objects == nil or objects == {} then return end
+		for i, obj in ipairs(objects) do
+			local inname, inimage, insize, ineffect, inflags, minffect, maxffect = create_object_para(obj)
+			local inid = Utils.getTableLength(GLOBAL_OBJECT_LIST)
+		
+			local obja = {name = inname, image = inimage, size=insize, id = inid, effect = ineffect, flags = inflags, mineffect = minffect, maxeffect = maxffect}
+			local object = Object:new(obja)
+			table.insert(GLOBAL_OBJECT_LIST, object)
+		end
 	end
 end
 
 --Creates a new Object, which will be stored in a global list. Returns: Object
-function Object:new(inname, inimage, insize, ineffect, inflags, minffect, maxffect)
-	local inobj = Object.getObjectByName(inname)
-	local inid = getTableLength(GLOBAL_OBJECT_LIST)
-	local obj = {name = inname, image = inimage, size=insize, id = inid, effect = ineffect, flags = inflags, mineffect = minffect, maxeffect = maxffect}
+function Object:new(obj)
     setmetatable(obj, self)
     self.__index = self
     return obj
@@ -123,6 +140,11 @@ function Object:getID()
 	return self["id"]
 end
 
+function Object:getCustomAttribute(attr)
+	if not self == Object.getObjectByID(self:getID()) then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
+	return self[attr]
+end
+
 function Object:setName(attr)
 	local obj = Object.getObjectByID(self:getID())
 	if obj == nil then return end
@@ -172,25 +194,47 @@ function Object:setFlags(attr)
 	self["flags"] = attr
 end
 
+function Object:setCustomAttribute(attr, val)
+	local obj = Object.getObjectByID(self:getID())
+	if obj == nil then return end
+	obj[attr] = val
+	self[attr] = val
+end
+
 --ENTITYOBJECT CLASS
 --Creates a new EntityObject, an object that can move across the screen. Returns: EntityObject
 function EntityObject:new(obj, begposx, begposy, begspeed, begdir)
 	local obj_effect = obj:getEffect()
 	local obj_flags = obj:getFlags()
-	local ID = getTableLength(GLOBAL_ENTITYOBJECT_LIST)
+	local ID = Utils.getTableLength(GLOBAL_ENTITYOBJECT_LIST)
 	
 	local eobj = {object = obj, speed = begspeed, direction = begdir, posx = begposx, posy = begposy, id = ID}
 	
 	setmetatable(eobj, self)
     self.__index = self
-	
 	table.insert(GLOBAL_ENTITYOBJECT_LIST, eobj)
-	
-	if obj_effect == nil or obj_effect == "" then return eobj end
-	
-	EntityEffect:new(Effect.getEffectByName(obj_effect), begposx, begposy, 1, obj:getMinEffect(), obj:getMaxEffect(), eobj)
-	
 	return eobj
+end
+
+--Creates a new custom EntityObject, an object that can move across the screen. Returns: EntityObject
+function EntityObject:newCustomEntityObject(eobj)
+	setmetatable(eobj, self)
+    self.__index = self
+	table.insert(GLOBAL_ENTITYOBJECT_LIST, eobj)
+	return eobj
+end
+
+--Creates a new EntityEffect. Returns: Nothing
+function EntityObject:applyDefaultEntityEffect()
+	local obj = self:getObject()
+	EntityEffect:new(Effect.getEffectByName(obj:getEffect()), 1, obj:getMinEffect(), obj:getMaxEffect(), self)
+end
+
+--Creates a new EntityEffect. Returns: Nothing
+function EntityObject:applyEntityEffect(name)
+	local obj = self:getObject()
+	obj:setEffect(name)
+	EntityEffect:new(Effect.getEffectByName(name), 1, obj:getMinEffect(), obj:getMaxEffect(), self)
 end
 
 --Called by love.draw() to update the EntityObjects. Returns: Nothing
@@ -198,7 +242,7 @@ function EntityObject.updateObjects()
 	for i, entObj in ipairs(GLOBAL_ENTITYOBJECT_LIST) do
 		local innerobj = entObj:getObject()
 		local size = innerobj:getSize()
-	
+		
 		if entObj:getPosX() - size*4 >= WINDOW_WIDTH or entObj:getPosY() - size*4 >= WINDOW_HEIGHT or entObj:getPosX() + size*4 <= 0 or entObj:getPosY() + size*4 <= 0 then --Keeps EntityObjects from eating delicious memory.
 			if innerobj:getFlags() == nil then 
 				table.remove(GLOBAL_ENTITYOBJECT_LIST, i)
@@ -285,6 +329,11 @@ function EntityObject:getID()
 	return self["id"]
 end
 
+function EntityObject:getCustomAttribute(attr)
+	if not self == EntityObject.getEntityObjectByID(self:getID()) then print("WARNING: An EntityObject is not synced to the object list! This may cause problems!") end
+	return self[attr]
+end
+
 function EntityObject:setObject(attr)
 	local obj = EntityObject.getEntityObjectByEntityObject(self)
 	if obj == nil then return end
@@ -318,4 +367,11 @@ function EntityObject:setDirection(attr)
 	if obj == nil then return end
 	obj["direction"] = attr
 	self["direction"] = attr
+end
+
+function EntityObject:setCustomAttribute(attr, val)
+	local obj = EntityObject.getEntityObjectByEntityObject(self)
+	if obj == nil then return end
+	obj[attr] = val
+	self[attr] = val
 end

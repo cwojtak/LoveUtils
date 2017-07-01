@@ -1,5 +1,5 @@
 --effect_helper.lua
---v1.7.8
+--v1.9.0
 --Author: Connor Wojtak
 --Purpose: A utility to add animated effects to an EntityObject.
 
@@ -14,23 +14,32 @@ EntityEffect = {}
 --Global Variables
 GLOBAL_EFFECT_LIST = {}
 GLOBAL_ENTITYEFFECT_LIST = {}
-GLOBAL_POSITION_LIST_X = {}
-GLOBAL_POSITION_LIST_Y = {}
 GLOBAL_ENTITYEFFECT_INDEX = 0
+
+--Variables
+local INC_IMAGE_STATE = false
 
 --Random
 math.randomseed(os.time())
 local randx = nil
 local randy = nil
 
+function getLengthOfEffectList()
+	return Utils.getTableLength(GLOBAL_EFFECT_LIST)
+end
+
+function getLengthOfEntityEffectList()
+	return Utils.getTableLength(GLOBAL_ENTITYEFFECT_LIST)
+end
+
 --Finds and reads all of the JSON files under the "effects/" folder. Returns: List
 function find_effects()
-	local JSONDirectory = love.filesystem.getDirectoryItems("effects/")
+	local JSONDirectory = love.filesystem.getDirectoryItems(EFFECT_PATH)
 	local returnList = {}
 	for i, dir in ipairs(JSONDirectory) do
-		if love.filesystem.isFile("effects/" .. dir) == true then
+		if love.filesystem.isFile(EFFECT_PATH .. dir) == true then
 			if string.find(dir, ".json") then
-				local content = love.filesystem.read("effects/" .. dir)
+				local content = love.filesystem.read(EFFECT_PATH .. dir)
 				if not content then print("ERROR: No effect files loaded. If you are using effects, this will cause problems.") return nil end
 				table.insert(returnList, content)
 			end
@@ -42,25 +51,32 @@ end
 --Decodes JSON data returns the parameters. Returns: String, LOVE Image
 function create_effect_para(data) 
 	local decoded_data = json.decode(data)
-	return decoded_data["name"], love.graphics.newImage("sprites/" .. decoded_data["image1"] .. ".jpg"), love.graphics.newImage("sprites/" .. decoded_data["image2"] .. ".jpg"), love.graphics.newImage("sprites/" .. decoded_data["image3"] .. ".jpg")
+	return decoded_data["name"], love.graphics.newImage(EFFECT_IMAGE_PATH .. decoded_data["image1"] .. ".jpg"), love.graphics.newImage("sprites/" .. decoded_data["image2"] .. ".jpg"), love.graphics.newImage("sprites/" .. decoded_data["image3"] .. ".jpg")
 end
 
 --EFFECT CLASS
 --Called on startup. Returns: Nothing
-function Effect.start()
-	local effects = find_effects()
-	if effects == nil or effects == {} then return end
-	for i, eff in ipairs(effects) do
-		local name, image1, image2, image3  = create_effect_para(eff)
-		local effect = Effect:new(name, image1, image2, image3)
-		table.insert(GLOBAL_EFFECT_LIST, effect)
+function Effect.start(method, decoded_data)
+	if method == true and decoded_data ~= nil then
+		for i, eff in ipairs(decoded_data) do
+			local effect = Effect:new(eff)
+			table.insert(GLOBAL_EFFECT_LIST, effect)
+		end
+	end
+	if not method == true then
+		local effects = find_effects()
+		if effects == nil or effects == {} then return end
+		for i, eff in ipairs(effects) do
+			local inname, inimage1, inimage2, inimage3  = create_effect_para(eff)
+			local inid = Utils.getTableLength(GLOBAL_EFFECT_LIST)
+			local effect = {name = inname, image1 = inimage1, image2 = inimage2, image3 = inimage3, id = inid}
+			table.insert(GLOBAL_EFFECT_LIST, Effect:new(effect))
+		end
 	end
 end
 
 --Creates a new Effect, which will be stored in a list. Returns: Effect
-function Effect:new(inname, inimage1, inimage2, inimage3)
-	local inid = getTableLength(GLOBAL_EFFECT_LIST)
-	local obj = {name = inname, image1 = inimage1, image2 = inimage2, image3 = inimage3, id = inid}
+function Effect:new(obj)
 	setmetatable(obj, self)
     self.__index = self
     return obj
@@ -107,6 +123,11 @@ function Effect:getID()
 	return self["id"]
 end
 
+function Effect:getCustomAttribute(attr)
+	if not self == Effect.getEffectByID(self:getID()) then print("WARNING: An Effect is not synced to the effect list! This may cause problems!") end
+	return self[attr]
+end
+
 function Effect:setName(attr)
 	local obj = Effect.getEffectByID(self:getID())
 	if obj == nil then return end
@@ -135,12 +156,19 @@ function Effect:setImage3(attr)
 	self["image3"] = attr
 end
 
+function Effect:setCustomAttribute(attr, val)
+	local obj = Effect.getEffectByID(self:getID())
+	if obj == nil then return end
+	obj[attr] = val
+	self[attr] = val
+end
+
 --ENTITYEFFECT CLASS
 --Creates a new EntityEffect. Returns: EntityEffect, Integer
-function EntityEffect:new(eff, inposx, inposy, startimg, mineffect, maxeffect, inentobj)
+function EntityEffect:new(eff, startimg, mineffect, maxeffect, inentobj)
 	local rand = math.random(mineffect, maxeffect)
-	local ID = getTableLength(GLOBAL_ENTITYEFFECT_LIST)
-	local eobj = {name = eff:getName(), image1 = eff:getImage1(), image2 = eff:getImage2(), image3 = eff:getImage3(), posx = inposx, posy = inposy, imgstate = startimg, am_effect = rand, id = ID, entobj=inentobj}
+	local ID = Utils.getTableLength(GLOBAL_ENTITYEFFECT_LIST) + 1
+	local eobj = {name = eff:getName(), image1 = eff:getImage1(), image2 = eff:getImage2(), image3 = eff:getImage3(), posx = {}, posy = {}, imgstate = startimg, am_effect = rand, id = ID, entobj=inentobj}
 	setmetatable(eobj, self)
     self.__index = self
 	table.insert(GLOBAL_ENTITYEFFECT_LIST, eobj)
@@ -149,12 +177,19 @@ end
 
 --Called by love.draw() to update the effects. Returns: Nothing
 function EntityEffect.updateEffects()
+	GLOBAL_ENTITYEFFECT_INDEX = GLOBAL_ENTITYEFFECT_INDEX + 1
+	if GLOBAL_ENTITYEFFECT_INDEX == 75 then
+		INC_IMAGE_STATE = true
+		GLOBAL_ENTITYEFFECT_INDEX = 0
+	end
+
 	for i, eff in ipairs(GLOBAL_ENTITYEFFECT_LIST) do
+		if INC_IMAGE_STATE == true then
+			eff:setImageState(eff:getImageState() + 1)
+		end
 		local entity_id = eff:getID()
-		
 		local entity_object = eff:getEntityObject()
 		if entity_object == nil then table.remove(GLOBAL_ENTITYEFFECT_LIST, i) return end -- Used when EntityObject is deleted. 
-		
 		local object = entity_object:getObject()
 		if object == nil then return end
 		
@@ -162,45 +197,42 @@ function EntityEffect.updateEffects()
 		
 		local entityposx = entity_object:getPosX()
 		local entityposy = entity_object:getPosY()
+		local x = eff:getPosX()
+		local y = eff:getPosY()
 		
-		if GLOBAL_ENTITYEFFECT_INDEX == 0 or GLOBAL_ENTITYEFFECT_INDEX == 15 or GLOBAL_ENTITYEFFECT_INDEX == 30 or GLOBAL_ENTITYEFFECT_INDEX == 45 or GLOBAL_ENTITYEFFECT_INDEX == 60 or GLOBAL_ENTITYEFFECT_INDEX == 75 then
-			local i = 0
-			while(i < eff:getEffectAmount()) do
-				GLOBAL_POSITION_LIST_X[i] = math.random(-size/8, size) * 2
-				GLOBAL_POSITION_LIST_Y[i] = math.random(-size/8, size) * 2
-				i = i + 1
+		if GLOBAL_ENTITYEFFECT_INDEX == 0 or GLOBAL_ENTITYEFFECT_INDEX == 15 or GLOBAL_ENTITYEFFECT_INDEX == 30 or GLOBAL_ENTITYEFFECT_INDEX == 45 or GLOBAL_ENTITYEFFECT_INDEX == 60 then
+			local r = 0
+			while(r ~= eff:getEffectAmount()) do
+				x[r] = math.random(-size/8, size) * 2
+				y[r] = math.random(-size/8, size) * 2
+				r = r + 1
 			end
 		end
-		
-		i = 0
+		z = 0
 		if eff:getImageState() == 4 then eff:setImageState(1) end
 		if eff:getImageState() == 1 then
-			while(i ~= eff:getEffectAmount()) do
-				if GLOBAL_POSITION_LIST_X[i] == nil or GLOBAL_POSITION_LIST_Y[i] == nil then return end
-				love.graphics.draw(eff:getImage1(), entityposx + GLOBAL_POSITION_LIST_X[i], entityposy + GLOBAL_POSITION_LIST_Y[i], 0, size/(size*8), size/(size*8), 0, 0, 0, 0)
-				i = i + 1
+			while(z ~= eff:getEffectAmount()) do
+				if x[z] == nil or y[z] == nil then return end
+				love.graphics.draw(eff:getImage1(), entityposx + x[z], entityposy + y[z], 0, size/(size*8), size/(size*8), 0, 0, 0, 0)
+				z = z + 1
 			end
 		end
 		if eff:getImageState() == 2 then
-			if GLOBAL_POSITION_LIST_X[i] == nil or GLOBAL_POSITION_LIST_Y[i] == nil then return end
-			while(i ~= eff:getEffectAmount()) do
-				love.graphics.draw(eff:getImage2(), entityposx + GLOBAL_POSITION_LIST_X[i], entityposy + GLOBAL_POSITION_LIST_Y[i], 0, size/(size*8), size/(size*8), 0, 0, 0, 0)
-				i = i + 1
+			while(z ~= eff:getEffectAmount()) do
+				if x[z] == nil or y[z] == nil then return end
+				love.graphics.draw(eff:getImage2(), entityposx + x[z], entityposy + y[z], 0, size/(size*8), size/(size*8), 0, 0, 0, 0)
+				z = z + 1
 			end
 		end
 		if eff:getImageState() == 3 then
-			if GLOBAL_POSITION_LIST_X[i] == nil or GLOBAL_POSITION_LIST_Y[i] == nil then return end
-			while(i ~= eff:getEffectAmount()) do
-				love.graphics.draw(eff:getImage3(), entityposx + GLOBAL_POSITION_LIST_X[i], entityposy + GLOBAL_POSITION_LIST_Y[i], 0, size/(size*8), size/(size*8), 0, 0, 0, 0)
-				i = i + 1
+			while(z ~= eff:getEffectAmount()) do
+				if x[z] == nil or y[z] == nil then return end
+				love.graphics.draw(eff:getImage3(), entityposx + x[z], entityposy + y[z], 0, size/(size*8), size/(size*8), 0, 0, 0, 0)
+				z = z + 1
 			end
 		end
-		if GLOBAL_ENTITYEFFECT_INDEX >= 75 then
-			eff:setImageState(eff:getImageState() + 1)
-			GLOBAL_ENTITYEFFECT_INDEX = 0
-		end
-  	GLOBAL_ENTITYEFFECT_INDEX = GLOBAL_ENTITYEFFECT_INDEX + 1
 	end
+	INC_IMAGE_STATE = false
 	collectgarbage()
 end
 
@@ -301,20 +333,6 @@ function EntityEffect:setImage3(attr)
 	if obj == nil then  return end
 	obj["image3"] = attr
 	self["image3"] = attr
-end
-
-function EntityEffect:setPosX(attr)
-	local obj = EntityEffect.getEntityEffectByID(self:getID())
-	if obj == nil then return end
-	obj["posx"] = attr
-	self["posx"] = attr
-end
-
-function EntityEffect:setPosY(attr)
-	local obj = EntityEffect.getEntityEffectByID(self:getID())
-	if obj == nil then return end
-	obj["posy"] = attr
-	self["posy"] = attr
 end
 
 function EntityEffect:setImageState(attr)

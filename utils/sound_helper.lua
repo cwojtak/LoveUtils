@@ -1,5 +1,5 @@
 --sound_helper.lua
---v1.7.8
+--v1.9.0
 --Author: Connor Wojtak
 --Purpose: A utility used for playing and stopping sounds.
 
@@ -17,12 +17,12 @@ GLOBAL_DT = 0
 
 --Finds and reads all of the JSON files under the "sounds/" folder. Returns: List
 function find_sounds()
-	local JSONDirectory = love.filesystem.getDirectoryItems("sounds/")
+	local JSONDirectory = love.filesystem.getDirectoryItems(SOUND_PATH)
 	local returnList = {}
 	for i, dir in ipairs(JSONDirectory) do
-		if love.filesystem.isFile("sounds/" .. dir) == true then
+		if love.filesystem.isFile(SOUND_PATH .. dir) == true then
 			if string.find(dir, ".json") then
-				local content = love.filesystem.read("sounds/" .. dir)
+				local content = love.filesystem.read(SOUND_PATH .. dir)
 				if not content then print("ERROR: No sound files loaded. If you are using sounds, this will cause problems.") return nil end
 				table.insert(returnList, content)
 			end
@@ -34,7 +34,7 @@ end
 --Decodes JSON data returns the parameters. Returns: String, Integer, LOVE Sound
 function create_sound_para(data) 
 	local decoded_data = json.decode(data)
-	return decoded_data["name"], love.audio.newSource("sounds/raw/" .. decoded_data["sound"]), decoded_data["length"], decoded_data["flags"]
+	return decoded_data["name"], love.audio.newSource(RAW_SOUND_PATH .. decoded_data["sound"]), decoded_data["length"], decoded_data["flags"]
 end
 
 --SOUND CLASS
@@ -51,7 +51,7 @@ end
 
 --Creates a new Sound, which will eventually be stored in a global list. Returns: List
 function Sound:new(inname, insound, inlength, inflags)
-	local obj = {name = inname, sound = insound, length = tonumber(inlength), index = 0, flags = inflags, id = getTableLength(GLOBAL_SOUND_LIST)}
+	local obj = {name = inname, sound = insound, length = tonumber(inlength), index = 0, flags = inflags, id = Utils.getTableLength(GLOBAL_SOUND_LIST)}
 	setmetatable(obj, self)
     self.__index = self
     return obj

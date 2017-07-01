@@ -1,5 +1,5 @@
 --effect_helper.lua
---v1.9.0
+--v1.9.5
 --Author: Connor Wojtak
 --Purpose: A utility to add animated effects to an EntityObject.
 
@@ -9,7 +9,7 @@ local UTILS = require("utils/utils")
 
 --Classes
 Effect = {name=nil, image1=nil, image2=nil, image3=nil}
-EntityEffect = {}
+EntityEffect = {name=nil, image1=nil, image2=nil, image3=nil, posx={}, posy={}, imgstate=nil, am_effect=nil, id=nil, entobj=nil}
 
 --Global Variables
 GLOBAL_EFFECT_LIST = {}
@@ -32,7 +32,7 @@ function getLengthOfEntityEffectList()
 	return Utils.getTableLength(GLOBAL_ENTITYEFFECT_LIST)
 end
 
---Finds and reads all of the JSON files under the "effects/" folder. Returns: List
+--Finds and reads all of the JSON files under the specified path. Returns: List
 function find_effects()
 	local JSONDirectory = love.filesystem.getDirectoryItems(EFFECT_PATH)
 	local returnList = {}
@@ -189,7 +189,8 @@ function EntityEffect.updateEffects()
 		end
 		local entity_id = eff:getID()
 		local entity_object = eff:getEntityObject()
-		if entity_object == nil then table.remove(GLOBAL_ENTITYEFFECT_LIST, i) return end -- Used when EntityObject is deleted. 
+		if entity_object == nil then table.remove(GLOBAL_ENTITYEFFECT_LIST, i) return end 
+		if EntityObject.getEntityObjectByEntityObject(entity_object) == nil then table.remove(GLOBAL_ENTITYEFFECT_LIST, i) return end -- Used when EntityObject is deleted. 
 		local object = entity_object:getObject()
 		if object == nil then return end
 		

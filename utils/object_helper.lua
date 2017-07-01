@@ -1,5 +1,5 @@
 --object_helper.lua
---v1.9.0
+--v1.9.5
 --Author: Connor Wojtak
 --Purpose: A utility to load and create objects, their attributes, and their sprites. This file also contains functions for reading attributes from Objects and EntityObjects.
 
@@ -26,7 +26,7 @@ function getLengthOfEntityObjectList()
 	return Utils.getTableLength(GLOBAL_ENTITYOBJECT_LIST)
 end
 
---Finds and reads all of the JSON files under the "objects/" folder. Returns: List
+--Finds and reads all of the JSON files under the specified path. Returns: List
 function find_objects()
 	local JSONDirectory = love.filesystem.getDirectoryItems(OBJECT_PATH)
 	local returnList = {}
@@ -203,12 +203,12 @@ end
 
 --ENTITYOBJECT CLASS
 --Creates a new EntityObject, an object that can move across the screen. Returns: EntityObject
-function EntityObject:new(obj, begposx, begposy, begspeed, begdir)
+function EntityObject:new(obj, begposx, begposy, begspeed, begdir, eventhandlersin)
 	local obj_effect = obj:getEffect()
 	local obj_flags = obj:getFlags()
 	local ID = Utils.getTableLength(GLOBAL_ENTITYOBJECT_LIST)
 	
-	local eobj = {object = obj, speed = begspeed, direction = begdir, posx = begposx, posy = begposy, id = ID}
+	local eobj = {object = obj, speed = begspeed, direction = begdir, posx = begposx, posy = begposy, id = ID, eventhandler = eventhandlersin}
 	
 	setmetatable(eobj, self)
     self.__index = self
@@ -242,9 +242,8 @@ function EntityObject.updateObjects()
 	for i, entObj in ipairs(GLOBAL_ENTITYOBJECT_LIST) do
 		local innerobj = entObj:getObject()
 		local size = innerobj:getSize()
-		
-		if entObj:getPosX() - size*4 >= WINDOW_WIDTH or entObj:getPosY() - size*4 >= WINDOW_HEIGHT or entObj:getPosX() + size*4 <= 0 or entObj:getPosY() + size*4 <= 0 then --Keeps EntityObjects from eating delicious memory.
-			if innerobj:getFlags() == nil then 
+		if entObj:getPosY() - size >= WINDOW_HEIGHT or entObj:getPosX() - size >= WINDOW_WIDTH or entObj:getPosY() + size*2 <= 0 or entObj:getPosX() + size*2 <= 0 then --Keeps EntityObjects from eating delicious memory.
+			if innerobj:getFlags() == nil or innerobj:getFlags() == "" then 
 				table.remove(GLOBAL_ENTITYOBJECT_LIST, i)
 				return
 			end
@@ -274,6 +273,19 @@ function EntityObject.updateObjects()
 		GLOBAL_ENTITYOBJECT_INDEX = GLOBAL_ENTITYOBJECT_INDEX + 1
 		
 		love.graphics.draw(innerobj:getImage(), entObj:getPosX(), entObj:getPosY(), 0, 1, 1, 0, 0, 0, 0)
+		
+		local skip = false
+		local i = 0
+		for i, obj in ipairs(entObj:getAllObjectEventHandlers()) do
+			if skip == false then
+				obj(entObj, innerobj, GLOBAL_ENTITYOBJECT_LIST)
+				skip = true
+			end
+			if skip == true then
+				skip = false
+			end
+			i = i + 1
+		end
 	end
 end
 
@@ -296,7 +308,6 @@ function EntityObject.getEntityObjectByEntityObject(class)
 	end
 	return nil
 end
-
 
 --ENTITYOBJECT ATTRIBUTE GETTERS/SETTERS
 --Gets or sets an attribute of an object. Returns: Attribute or Nil
@@ -332,6 +343,32 @@ end
 function EntityObject:getCustomAttribute(attr)
 	if not self == EntityObject.getEntityObjectByID(self:getID()) then print("WARNING: An EntityObject is not synced to the object list! This may cause problems!") end
 	return self[attr]
+end
+
+--Gets a event handler from the list of object event handlers. Returns: EventHandler or Nil
+function EntityObject:getObjectEventHandler(id)
+	if not self == EntityObject.getEntityObjectByID(self:getID()) then print("WARNING: An EntityObject is not synced to the object list! This may cause problems!") end
+	local skip = false
+	local i = 0
+	local list = self["eventhandler"]
+	for i, obj in ipairs(list) do
+		if skip == false then
+			if obj == id then
+				return list[i - 1]
+			end
+			skip = true
+		end
+		i = i + 1
+		if skip == true then
+			skip = false
+		end
+	end
+end
+
+--Gets a list of all event handlers. Returns List
+function EntityObject:getAllObjectEventHandlers(id)
+	if not self == EntityObject.getEntityObjectByID(self:getID()) then print("WARNING: An EntityObject is not synced to the object list! This may cause problems!") end
+	return self["eventhandler"]
 end
 
 function EntityObject:setObject(attr)
@@ -374,4 +411,50 @@ function EntityObject:setCustomAttribute(attr, val)
 	if obj == nil then return end
 	obj[attr] = val
 	self[attr] = val
+end
+
+--Links a new EventHandler to an EntityObject. The func argument takes a valid anonymous function that takes the arguments: EntityObject, Object, EntityObject List, and checks for the event conditions, and acts accordingly. This is called every loop, so be careful to not put resource intensive code in here.  Returns: Nothing
+function EntityObject:registerObjectEventHandler(func)
+	local obj = EntityObject.getEntityObjectByEntityObject(self)
+	if obj == nil then return end
+	table.insert(obj["eventhandler"], func)
+	table.insert(self["eventhandler"], func)
+	return Utils.getTableLength(self["eventhandler"])
+end
+
+--Removes an EventHandler from the Object's EventHandler list. Returns: Nothing
+function EntityObject:removeObjectEventHandler(id)
+	local obj = EntityObject.getEntityObjectByEntityObject(self)
+	if obj == nil then return end
+	local skip = false
+	local i = 0
+	for i, obj in ipairs(obj["eventhandler"]) do
+		if skip == false then
+			if obj == id then
+				table.remove(obj["eventhandler"], i)
+				table.remove(obj["eventhandler"], i - 1)
+			end
+		skip = true
+		end
+		i = i + 1
+		if skip == true then
+			skip = false
+		end
+	end
+	
+	local skip = false
+	local i = 0
+	for i, obj in ipairs(self["eventhandler"]) do
+		if skip == false then
+			if obj == id then
+				table.remove(self["eventhandler"], i)
+				table.remove(self["eventhandler"], i - 1)
+			end
+		skip = true
+		end
+		i = i + 1
+		if skip == true then
+			skip = false
+		end
+	end
 end

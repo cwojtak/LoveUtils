@@ -1,5 +1,5 @@
 --sound_helper.lua
---v1.9.0
+--v1.9.5
 --Author: Connor Wojtak
 --Purpose: A utility used for playing and stopping sounds.
 
@@ -15,7 +15,7 @@ GLOBAL_SOUND_LIST = {}
 GLOBAL_PLAY_LIST = {}
 GLOBAL_DT = 0
 
---Finds and reads all of the JSON files under the "sounds/" folder. Returns: List
+--Finds and reads all of the JSON files under the specified path. Returns: List
 function find_sounds()
 	local JSONDirectory = love.filesystem.getDirectoryItems(SOUND_PATH)
 	local returnList = {}

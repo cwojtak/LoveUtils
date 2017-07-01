@@ -1,5 +1,5 @@
 --utils.lua
---v1.9.0
+--v1.9.5
 --Author: Connor Wojtak
 --Purpose: This utility provides a variety of different functions not relating to a certain class.
 
@@ -26,6 +26,7 @@ function Utils.getTableLength(aTable)
   return count
 end
 
+--Loads all paths required to find objects, effects, levels, and sounds. Returns: Nothing
 function Utils.loadPathSettings()
 	local content = nil
 	local JSONDirectory = love.filesystem.getDirectoryItems("utils/")
@@ -47,6 +48,7 @@ function Utils.loadPathSettings()
 	LEVEL_PATH = decoded_data["level_path"]
 end
 
+--Starts the Utilities, which are required to run. Returns: Nothing
 function Utils.start()
 	Utils.loadPathSettings()
 end

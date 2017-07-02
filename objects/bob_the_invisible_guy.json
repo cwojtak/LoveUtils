@@ -1,1 +1,1 @@
-{ "name":"bob_the_invisible_guy" , "image":"bob_the_invisible_guy" , "size":"64" , "special":"" , "flags":"" , "min_effect":"0" , "max_effect":"0" }
+{ "name":"bob_the_invisible_guy" , "image":"bob_the_invisible_guy" , "size":"64" , "effect":"" , "flags":"" , "min_effect":"0" , "max_effect":"0" }

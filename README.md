@@ -3,7 +3,7 @@ Utilities for the LOVE Game Engine
 
 These utilities provide easy to make object classes and effect classes, and provide support for events and easy to make JSON files.
 Just put these folders in the main directory of your LOVE program, and you are all set!
-Theres documentation at [doc.connorwojtak.com](https://doc.connorwojtak.com/index.php?title=LoveUtils) for further help with usage, etc.
+There's documentation at [doc.connorwojtak.com](https://doc.connorwojtak.com/index.php?title=LoveUtils) for further help with usage.
 
 Full list of features:
  - Easy to use Object class

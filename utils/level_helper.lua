@@ -1,5 +1,5 @@
 --level_helper.lua
---v1.9.5
+--v1.9.6
 --Author: Connor Wojtak
 --Purpose: A utility to load levels, their attributes, and their backgrounds, and turn them into
 --lists containing those attributes. This file also contains functions for reading the Level lists.
@@ -10,16 +10,17 @@ local UTILS = require("utils/utils")
 local OBJECT_HELPER = require("utils/object_helper")
 local SOUND_HELPER = require("utils/sound_helper")
 
---Global Variables
-GLOBAL_LEVEL_LIST = {}
-GLOBAL_LEVEL_INDEX = 0
-
 --Classes
 Level = {}
 
 --Global Variables
+GLOBAL_LEVEL_LIST = {}
+GLOBAL_LEVEL_INDEX = 0
 LAST_LEVEL = nil
 UPDATE_BACKGROUND = false
+
+--Local Variables
+supressWarningMessages = false
 
 --Finds and reads all of the JSON files under the specified path. Returns: List
 function find_levels()
@@ -80,7 +81,14 @@ end
 
 --Called by love.draw() to draw the new background for the level. Returns: Nothing
 function Level.updateBackground()
-	love.graphics.draw(love.graphics.newImage(LAST_LEVEL:getBackground()), 1, 1, 0, WINDOW_WIDTH/1920, WINDOW_HEIGHT/1080, 0, 0, 0, 0)
+	if LAST_LEVEL == nil then
+		if supressWarningMessages == false then
+			print("Failed to render a level, assuming there is no level loaded. Supressing further messages.")
+			supressWarningMessages = true
+		end
+	else
+		love.graphics.draw(love.graphics.newImage(LAST_LEVEL:getBackground()), 1, 1, 0, WINDOW_WIDTH/1920, WINDOW_HEIGHT/1080, 0, 0, 0, 0)
+	end
 end
 
 --Finds a level with the level's name. Returns: Integer or Nil

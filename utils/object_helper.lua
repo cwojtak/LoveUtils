@@ -1,5 +1,5 @@
 --object_helper.lua
---v1.9.5
+--v1.9.6
 --Author: Connor Wojtak
 --Purpose: A utility to load and create objects, their attributes, and their sprites. This file also contains functions for reading attributes from Objects and EntityObjects.
 
@@ -49,7 +49,7 @@ function create_object_para(data)
 end
 
 --OBJECT CLASS
---Called by love.load() on startup. Uses a default JSON loading method, or a custom one. Returns: Nothing
+--Called by love.load() on startup. Uses a default or custom JSON loading method. Returns: Nothing
 function Object.start(method, decoded_data)
 	if method == true and decoded_data ~= nil then
 		for i, obj in ipairs(decoded_data) do

@@ -1,5 +1,5 @@
 --button_helper.lua
---v1.10.13
+--v1.10.14
 --Author: Connor Wojtak
 --Purpose: A utility to allow for the creation of buttons.
 
@@ -35,8 +35,8 @@ end
 function Button.updateButtons()
 	local x, y = love.mouse.getPosition()
 	for i, b in ipairs(GLOBAL_BUTTON_LIST) do
-		if x > b["beginx"] and x < b["endx"] then
-			if y > b["beginy"] and y < b["endy"] then
+		if x > b:getBeginningX() and x < b:getEndX() then
+			if y > b:getBeginningY() and y < b:getEndY() then
 				local hover = Button.getHoverEvent(b)
 				hover()
 			end
@@ -47,8 +47,8 @@ end
 --Called by love.mousepressed() to check if a button has been clicked.
 function Button.onClickedHook(x, y, button, istouch)
 	for i, b in ipairs(GLOBAL_BUTTON_LIST) do
-		if x > b["beginx"] and x < b["endx"] then
-			if y > b["beginy"] and y < b["endy"] then
+		if x > b:getBeginningX() and x < b:getEndX() then
+			if y > b:getBeginningY() and y < b:getEndY() then
 				local click = Button.getClickEvent(b)
 				click(x, y, button, istouch)
 			end

@@ -1,5 +1,5 @@
 --effect_helper.lua
---v1.10.13
+--v1.10.14
 --Author: Connor Wojtak
 --Purpose: A utility to add animated effects to an EntityObject.
 

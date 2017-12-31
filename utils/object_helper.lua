@@ -1,5 +1,5 @@
 --object_helper.lua
---v1.10.13
+--v1.10.14
 --Author: Connor Wojtak
 --Purpose: A utility to load and create objects, their attributes, and their sprites. This file also contains functions for reading attributes from Objects and EntityObjects.
 

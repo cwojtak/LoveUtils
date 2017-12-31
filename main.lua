@@ -1,5 +1,5 @@
 --main.lua
---v1.9.6
+--v1.10.0
 --Author: Connor Wojtak
 --Purpose: This file tests the utilities.
 
@@ -9,6 +9,7 @@ function love.load()
 	local LEVEL_HELPER = require("utils/level_helper")
 	local EFFECT_HELPER = require("utils/effect_helper")
 	local SOUND_HELPER = require("utils/sound_helper")
+	local BUTTON_HELPER = require("utils/button_helper")
 	local UTILS = require("utils/utils")
 	
 	--Load objects and levels
@@ -18,17 +19,13 @@ function love.load()
 	Effect.start(false)
 	Sound.start()
 	
-	--Set default graphics, etc.
-	love.graphics.setNewFont(12)
-	screen = love.window.setMode(WINDOW_WIDTH, WINDOW_HEIGHT)
-	if screen == false then
-		os.exit(1)
-	end
+	--Start an example level.
 	Level.newLevel(Level.getLevelByName("main_menu"))
 end
 
 function love.update(dt)
 	Sound.updateSounds(dt)
+	Button.updateButtons()
 end
 
 function love.draw()
@@ -40,6 +37,7 @@ function love.draw()
 end
 
 function love.mousepressed(x, y, button, istouch)
+	Button.onClickedHook(x, y, button, istouch)
 end
 
 function love.mousereleased(x, y, button, istouch)
@@ -48,6 +46,15 @@ end
 function love.keyreleased(key)
 	if key == "x" then --Allows you to escape the program.
 		os.exit(0)
+	end
+	if key == "b" then
+		Button:new(10, 10, 100, 100, 
+		function(x, y, button, istouch)
+		EntityObject:new(Object.getObjectByName("kitty"), 0, 0, 9.8, "down", {})
+		end,
+		function(x, y, button, istouch)
+		EntityObject:new(Object.getObjectByName("kitty"), 0, 0, 1, "down", {})
+		end)
 	end
 	if key == "e" then --Creates a kitty going up.
 		local z = EntityObject:new(Object.getObjectByName("kitty"), 0, 0, 9.8, "up", {})
@@ -73,6 +80,7 @@ function love.keyreleased(key)
 		Level.stop()
 		Level.newLevel(Level.getLevelByName("main_menu"))
 	end
+	
 end
 
 function love.focus(f)

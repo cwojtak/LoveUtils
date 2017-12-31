@@ -1,5 +1,5 @@
 --object_helper.lua
---v1.9.6
+--v1.10.0
 --Author: Connor Wojtak
 --Purpose: A utility to load and create objects, their attributes, and their sprites. This file also contains functions for reading attributes from Objects and EntityObjects.
 
@@ -214,6 +214,15 @@ function EntityObject:new(obj, begposx, begposy, begspeed, begdir, eventhandlers
     self.__index = self
 	table.insert(GLOBAL_ENTITYOBJECT_LIST, eobj)
 	return eobj
+end
+
+--Destroys an EntityObject. Returns: Nothing
+function EntityObject:destroy()
+	for i, b in ipairs(GLOBAL_ENTITYOBJECT_LIST) do
+		if b == self then
+			table.remove(GLOBAL_ENTITYOBJECT_LIST, i)
+		end
+	end
 end
 
 --Creates a new custom EntityObject, an object that can move across the screen. Returns: EntityObject

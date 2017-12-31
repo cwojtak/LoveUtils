@@ -1,5 +1,5 @@
 --utils.lua
---v1.9.6
+--v1.10.0
 --Author: Connor Wojtak
 --Purpose: This utility provides a variety of different functions not relating to a certain class.
 
@@ -7,6 +7,7 @@
 local JSON_READER = require("utils/json/json")
 
 --Global Variables
+SCREEN = nil
 WINDOW_WIDTH, WINDOW_HEIGHT = love.window.getDesktopDimensions(1)
 OBJECT_PATH = nil
 EFFECT_PATH = nil

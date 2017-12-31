@@ -1,5 +1,5 @@
 --level_helper.lua
---v1.9.6
+--v1.10.0
 --Author: Connor Wojtak
 --Purpose: A utility to load levels, their attributes, and their backgrounds, and turn them into
 --lists containing those attributes. This file also contains functions for reading the Level lists.
@@ -47,6 +47,13 @@ end
 --LEVEL CLASS
 --Called on startup. Returns: Nothing
 function Level.start()
+
+	--Set default graphics, etc.
+	SCREEN = love.window.setMode(WINDOW_WIDTH, WINDOW_HEIGHT)
+	if SCREEN == false then
+		os.exit(1)
+	end
+
 	local levels = find_levels()
 	if levels == nil or levels == {} then return end
 	for i, obj in ipairs(levels) do

@@ -1,5 +1,5 @@
 --effect_helper.lua
---v1.10.0
+--v1.10.13
 --Author: Connor Wojtak
 --Purpose: A utility to add animated effects to an EntityObject.
 
@@ -14,6 +14,7 @@ EntityEffect = {name=nil, image1=nil, image2=nil, image3=nil, posx={}, posy={}, 
 --Global Variables
 GLOBAL_EFFECT_LIST = {}
 GLOBAL_ENTITYEFFECT_LIST = {}
+ID_INDEX = 0
 GLOBAL_ENTITYEFFECT_INDEX = 0
 
 --Variables
@@ -24,10 +25,12 @@ math.randomseed(os.time())
 local randx = nil
 local randy = nil
 
+--Gets the length of the GLOBAL_EFFECT_LIST.
 function getLengthOfEffectList()
 	return Utils.getTableLength(GLOBAL_EFFECT_LIST)
 end
 
+--Gets the length of the GLOBAL_ENTITYEFFECT_LIST.
 function getLengthOfEntityEffectList()
 	return Utils.getTableLength(GLOBAL_ENTITYEFFECT_LIST)
 end
@@ -82,6 +85,11 @@ function Effect:new(obj)
     return obj
 end
 
+--Destroys a loaded effect. Returns: Nothing
+function Effect.destroy(eff)
+	table.remove(GLOBAL_EFFECT_LIST, eff:getID())
+end
+
 --Finds the ID of an effect with the effect's name based on where it is stored in the Effect list. Returns: Integer or Nil
 function Effect.getEffectByName(effectname)
 	for i, eff in ipairs(GLOBAL_EFFECT_LIST) do
@@ -98,7 +106,7 @@ function Effect.getEffectByID(effectID)
 end
 
 --EFFECT ATTRIBUTE GETTERS/SETTERS
---Gets or sets an attribute of an Effect. Returns: Attribute or Nil
+--Gets or sets an attribute of an Effect. Returns: Attribute or Nothing
 function Effect:getName()
 	if not self == Effect.getEffectByID(self:getID()) then print("WARNING: An Effect is not synced to the effect list! This may cause problems!") end
 	return self["name"]
@@ -167,12 +175,23 @@ end
 --Creates a new EntityEffect. Returns: EntityEffect, Integer
 function EntityEffect:new(eff, startimg, mineffect, maxeffect, inentobj)
 	local rand = math.random(mineffect, maxeffect)
-	local ID = Utils.getTableLength(GLOBAL_ENTITYEFFECT_LIST) + 1
+	local ID = ID_INDEX
+	ID_INDEX = ID_INDEX + 1
 	local eobj = {name = eff:getName(), image1 = eff:getImage1(), image2 = eff:getImage2(), image3 = eff:getImage3(), posx = {}, posy = {}, imgstate = startimg, am_effect = rand, id = ID, entobj=inentobj}
 	setmetatable(eobj, self)
     self.__index = self
 	table.insert(GLOBAL_ENTITYEFFECT_LIST, eobj)
 	return eobj
+end
+
+--Removes an exisiting EntityEffect from an object. Returns: Nothing
+function EntityEffect.destroy(entobj)
+	for i, e in ipairs(GLOBAL_ENTITYEFFECT_LIST) do
+		if e:getEntityObject() == entobj then
+			table.remove(GLOBAL_ENTITYEFFECT_LIST, i)
+			return
+		end
+	end
 end
 
 --Called by love.draw() to update the effects. Returns: Nothing
@@ -237,21 +256,11 @@ function EntityEffect.updateEffects()
 	collectgarbage()
 end
 
---Finds the ID of an EntityEffect by indexing the EntityEffect list with the given ID. Returns: Integer or Nil
+--Finds the EntityEffect by its name. Returns: Integer or Nil
 function EntityEffect.getEntityEffectByID(ID)
 	for i, ent in ipairs(GLOBAL_ENTITYEFFECT_LIST) do
 		if ent:getID() == ID then
 			return ent
-		end
-	end
-	return nil
-end
-
---Finds the name of an EntityEffect with the effect's name based on where it is stored in the EntityEffect list. Returns: String or Nil
-function EntityEffect.getEntityEffectByName(name)
-	for i, eff in ipairs(GLOBAL_ENTITYEFFECT_LIST) do
-		if eff:getName() == name then
-			return eff
 		end
 	end
 	return nil

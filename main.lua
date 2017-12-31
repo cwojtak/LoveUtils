@@ -1,5 +1,5 @@
 --main.lua
---v1.10.0
+--v1.10.13
 --Author: Connor Wojtak
 --Purpose: This file tests the utilities.
 
@@ -57,7 +57,7 @@ function love.keyreleased(key)
 		end)
 	end
 	if key == "e" then --Creates a kitty going up.
-		local z = EntityObject:new(Object.getObjectByName("kitty"), 0, 0, 9.8, "up", {})
+		local z = EntityObject:new(Object.getObjectByName("kitty"), 0, 0, 9.8, "right", {})
 		z:applyDefaultEntityEffect() -- Applies the default EntityEffect.
 		
 		z:registerObjectEventHandler(function (entObj, obj, obj_list) -- Creates a new EventHandler.

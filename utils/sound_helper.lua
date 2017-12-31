@@ -1,5 +1,5 @@
 --sound_helper.lua
---v1.10.0
+--v1.10.13
 --Author: Connor Wojtak
 --Purpose: A utility used for playing and stopping sounds.
 
@@ -14,6 +14,16 @@ Sound = {}
 GLOBAL_SOUND_LIST = {}
 GLOBAL_PLAY_LIST = {}
 GLOBAL_DT = 0
+
+--Gets the length of the GLOBAL_SOUND_LIST.
+function getLengthOfSoundList()
+	return Utils.getTableLength(GLOBAL_SOUND_LIST)
+end
+
+--Gets the length of the GLOBAL_PLAY_LIST(contains all sounds currently playing).
+function getLengthOfPlayingList()
+	return Utils.getTableLength(GLOBAL_PLAY_LIST)
+end
 
 --Finds and reads all of the JSON files under the specified path. Returns: List
 function find_sounds()
@@ -55,6 +65,11 @@ function Sound:new(inname, insound, inlength, inflags)
 	setmetatable(obj, self)
     self.__index = self
     return obj
+end
+
+--Deletes a loaded sound. Returns: Nothing
+function Sound.destroy(sound)
+	table.remove(GLOBAL_SOUND_LIST, sound:getID())
 end
 
 --Plays a sound using the sound's name. Returns: Nothing
@@ -135,8 +150,8 @@ function Sound.getSoundByID(id)
 	return nil
 end
 
---OBJECT ATTRIBUTE GETTERS/SETTERS
---Gets or sets an attribute of a Sound. Returns: Attribute or Nil
+--SOUND ATTRIBUTE GETTERS/SETTERS
+--Gets or sets an attribute of a Sound. Returns: Attribute or Nothing
 function Sound:getName()
 	if not self == Sound.getSoundByID(self:getID()) then print("WARNING: A Sound is not synced to the sound list! This may cause problems!") end
 	return self["name"]

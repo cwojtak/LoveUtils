@@ -1,5 +1,5 @@
 --object_helper.lua
---v1.10.0
+--v1.10.13
 --Author: Connor Wojtak
 --Purpose: A utility to load and create objects, their attributes, and their sprites. This file also contains functions for reading attributes from Objects and EntityObjects.
 
@@ -18,10 +18,12 @@ GLOBAL_OBJECT_LIST = {}
 GLOBAL_ENTITYOBJECT_LIST = {}
 GLOBAL_ENTITYOBJECT_INDEX = 0
 
+--Gets the length of the GLOBAL_OBJECT_LIST.
 function getLengthOfObjectList()
 	return Utils.getTableLength(GLOBAL_OBJECT_LIST)
 end
 
+--Gets the length of the GLOBAL_ENTITYOBJECT_LIST.
 function getLengthOfEntityObjectList()
 	return Utils.getTableLength(GLOBAL_ENTITYOBJECT_LIST)
 end
@@ -79,6 +81,11 @@ function Object:new(obj)
     return obj
 end
 
+--Deletes a loaded object. Returns: Nothing
+function Object.destroy(obj)
+	table.remove(GLOBAL_OBJECT_LIST, obj:getID())
+end
+
 --Finds an Object in the global list using a given name. Returns: Object or Nil
 function Object.getObjectByName(objectname)
 	for i, obj in ipairs(GLOBAL_OBJECT_LIST) do
@@ -100,7 +107,7 @@ function Object.getObjectByID(objectID)
 end
 
 --OBJECT ATTRIBUTE GETTERS/SETTERS
---Gets or sets an attribute of an Object. Returns: Attribute or Nil
+--Gets or sets an attribute of an Object. Returns: Attribute or Nothing
 function Object:getName()
 	if not self == Object.getObjectByID(self:getID()) then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
 	return self["name"]
@@ -225,7 +232,7 @@ function EntityObject:destroy()
 	end
 end
 
---Creates a new custom EntityObject, an object that can move across the screen. Returns: EntityObject
+--Creates a new custom EntityObject(allows for values to be accessed manually through EntityObject:GetCustomAttribute()), an object that can move across the screen. Returns: EntityObject
 function EntityObject:newCustomEntityObject(eobj)
 	setmetatable(eobj, self)
     self.__index = self
@@ -244,6 +251,11 @@ function EntityObject:applyEntityEffect(name)
 	local obj = self:getObject()
 	obj:setEffect(name)
 	EntityEffect:new(Effect.getEffectByName(name), 1, obj:getMinEffect(), obj:getMaxEffect(), self)
+end
+
+--Removes an EntityEffect. Returns: Nothing
+function EntityObject:removeEntityEffect(name)
+	EntityEffect.destroy(self)
 end
 
 --Called by love.draw() to update the EntityObjects. Returns: Nothing
@@ -319,7 +331,7 @@ function EntityObject.getEntityObjectByEntityObject(class)
 end
 
 --ENTITYOBJECT ATTRIBUTE GETTERS/SETTERS
---Gets or sets an attribute of an object. Returns: Attribute or Nil
+--Gets or sets an attribute of an object. Returns: Attribute or Nothing
 function EntityObject:getObject()
 	if not self == EntityObject.getEntityObjectByID(self:getID()) then print("WARNING: An EntityObject is not synced to the object list! This may cause problems!") end
 	return self["object"]

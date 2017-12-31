@@ -1,5 +1,5 @@
 --level_helper.lua
---v1.10.0
+--v1.10.13
 --Author: Connor Wojtak
 --Purpose: A utility to load levels, their attributes, and their backgrounds, and turn them into
 --lists containing those attributes. This file also contains functions for reading the Level lists.
@@ -21,6 +21,11 @@ UPDATE_BACKGROUND = false
 
 --Local Variables
 supressWarningMessages = false
+
+--Gets the length of the GLOBAL_LEVEL_LIST.
+function getLengthOfLevelList()
+	return Utils.getTableLength(GLOBAL_LEVEL_LIST)
+end
 
 --Finds and reads all of the JSON files under the specified path. Returns: List
 function find_levels()
@@ -47,7 +52,6 @@ end
 --LEVEL CLASS
 --Called on startup. Returns: Nothing
 function Level.start()
-
 	--Set default graphics, etc.
 	SCREEN = love.window.setMode(WINDOW_WIDTH, WINDOW_HEIGHT)
 	if SCREEN == false then
@@ -70,6 +74,11 @@ function Level:new(inname, inmusic, inbackground)
 	setmetatable(obj, self)
     self.__index = self
     return obj
+end
+
+--Destroys a loaded level. Returns: Nothing
+function Level.destroy(level)
+	table.remove(GLOBAL_LEVEL_LIST, level:getID())
 end
 
 --Starts a new level. Returns: Nothing
@@ -118,7 +127,7 @@ function Level.getLevelByID(id)
 end
 
 --LEVEL ATTRIBUTE GETTERS/SETTERS
---Gets or sets an attribute of a Level. Returns: Attribute or Nil
+--Gets or sets an attribute of a Level. Returns: Attribute or Nothing
 function Level:getName()
 	if not self == Level.getLevelByID(self:getID()) then print("WARNING: A Level is not synced to the level list! This may cause problems!") end
 	return self["name"]

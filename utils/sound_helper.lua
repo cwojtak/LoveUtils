@@ -126,8 +126,10 @@ function Sound.stopByName(name)
 	end
 	
 	local sound = Sound.getSoundByName(name)
-	love.audio.stop(sound:getSound())
-	table.remove(GLOBAL_PLAY_LIST, sound:getID())
+	if sound ~= nil and sound ~= "" then
+		love.audio.stop(sound:getSound())
+		table.remove(GLOBAL_PLAY_LIST, sound:getID())
+	end
 end
 
 --Finds a sound with the sound's name. Returns: Integer OR Nil

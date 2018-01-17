@@ -85,12 +85,17 @@ end
 function Level.newLevel(level)
 	LAST_LEVEL = level
 	local music = level:getMusic()
-	Sound.playByName(music)
+	if music ~= "" and music ~= nil then
+		Sound.playByName(music)
+	end
 end
 
 --Stops the current running level. Returns: Nothing
 function Level.stop()
-	Sound.stopByName(LAST_LEVEL:getMusic())
+	if LAST_LEVEL == nil then GLOBAL_ENTITYOBJECT_LIST = {} return end
+	if LAST_LEVEL:getMusic() ~= nil then
+		Sound.stopByName(LAST_LEVEL:getMusic())
+	end
 	GLOBAL_ENTITYOBJECT_LIST = {}
 	LAST_LEVEL = nil
 end

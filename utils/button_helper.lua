@@ -14,8 +14,8 @@ Button = {beginx=nil, beginy=nil, endx=nil, endy=nil, clickfunc=nil, hoverfunc=n
 GLOBAL_BUTTON_LIST = {}
 
 --Creates a new button. Returns: Button
-function Button:new(inbeginx, inbeginy, inendx, inendy, inclickfunc, inhoverfunc)
-	local obj = {beginx=inbeginx, beginy=inbeginy, endx=inendx, endy=inendy, clickfunc=inclickfunc, hoverfunc=inhoverfunc}
+function Button:new(inbeginx, inbeginy, inendx, inendy, inclickfunc, inhoverfunc, innonhoverfunc)
+	local obj = {beginx=inbeginx, beginy=inbeginy, endx=inendx, endy=inendy, clickfunc=inclickfunc, hoverfunc=inhoverfunc, nonhoverfunc=innonhoverfunc}
 	setmetatable(obj, self)
     self.__index = self
 	table.insert(GLOBAL_BUTTON_LIST, obj)
@@ -31,6 +31,11 @@ function Button:destroy()
 	end
 end
 
+--Clears all buttons from the screen. Returns: Nothing
+function Button.destroyAllButtons()
+	GLOBAL_BUTTON_LIST = {}
+end
+
 --Called by love.draw() to update the buttons. Returns: Nothing
 function Button.updateButtons()
 	local x, y = love.mouse.getPosition()
@@ -38,8 +43,17 @@ function Button.updateButtons()
 		if x > b:getBeginningX() and x < b:getEndX() then
 			if y > b:getBeginningY() and y < b:getEndY() then
 				local hover = Button.getHoverEvent(b)
-				hover()
+				if hover == nil then return end
+				hover(b)
+			else
+				local nohover = Button.getNotHoveringEvent(b)
+				if nohover == nil then return end
+				nohover(b)
 			end
+		else
+			local nohover = Button.getNotHoveringEvent(b)
+			if nohover == nil then return end
+			nohover(b)
 		end
 	end
 end
@@ -50,7 +64,8 @@ function Button.onClickedHook(x, y, button, istouch)
 		if x > b:getBeginningX() and x < b:getEndX() then
 			if y > b:getBeginningY() and y < b:getEndY() then
 				local click = Button.getClickEvent(b)
-				click(x, y, button, istouch)
+				if click == nil then return end
+				click(x, y, button, istouch, b)
 			end
 		end
 	end
@@ -70,6 +85,15 @@ function Button.getHoverEvent(button)
 	for i, b in ipairs(GLOBAL_BUTTON_LIST) do
 		if b == button then
 			return button["hoverfunc"]
+		end
+	end
+end
+
+--Returns the function to be executed while the button is being hovered over. Returns: Function
+function Button.getNotHoveringEvent(button)
+	for i, b in ipairs(GLOBAL_BUTTON_LIST) do
+		if b == button then
+			return button["nonhoverfunc"]
 		end
 	end
 end

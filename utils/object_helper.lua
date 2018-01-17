@@ -264,7 +264,9 @@ function EntityObject.updateObjects()
 		local innerobj = entObj:getObject()
 		local size = innerobj:getSize()
 		if entObj:getPosY() - size >= WINDOW_HEIGHT or entObj:getPosX() - size >= WINDOW_WIDTH or entObj:getPosY() + size*2 <= 0 or entObj:getPosX() + size*2 <= 0 then --Keeps EntityObjects from eating delicious memory.
-			if innerobj:getFlags() == nil or innerobj:getFlags() == "" then 
+			if innerobj:getFlags() == "offscreen" then 
+				--The object is good, nothing needs to happen.
+			else
 				table.remove(GLOBAL_ENTITYOBJECT_LIST, i)
 				return
 			end

@@ -5,11 +5,14 @@
 
 function love.load()
 	--Initalize modules
+	local JSON_READER = require("utils/json/json")
 	local OBJECT_HELPER = require("utils/object_helper")
 	local LEVEL_HELPER = require("utils/level_helper")
 	local EFFECT_HELPER = require("utils/effect_helper")
 	local SOUND_HELPER = require("utils/sound_helper")
 	local BUTTON_HELPER = require("utils/button_helper")
+	local TIMER_HELPER = require("utils/timer_helper")
+	local DRAWABLE_HELPER = require("utils/drawable_helper")
 	local UTILS = require("utils/utils")
 	
 	--Load objects and levels

@@ -1,5 +1,5 @@
 --effect_helper.lua
---v1.10.14
+--v1.11.0
 --Author: Connor Wojtak
 --Purpose: A utility to add animated effects to an EntityObject.
 
@@ -40,7 +40,7 @@ function find_effects()
 	local JSONDirectory = love.filesystem.getDirectoryItems(EFFECT_PATH)
 	local returnList = {}
 	for i, dir in ipairs(JSONDirectory) do
-		if love.filesystem.isFile(EFFECT_PATH .. dir) == true then
+		if love.filesystem.getInfo(EFFECT_PATH .. dir) ~= nil then
 			if string.find(dir, ".json") then
 				local content = love.filesystem.read(EFFECT_PATH .. dir)
 				if not content then print("ERROR: No effect files loaded. If you are using effects, this will cause problems.") return nil end

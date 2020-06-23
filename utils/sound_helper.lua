@@ -1,5 +1,5 @@
 --sound_helper.lua
---v1.10.14
+--v1.11.0
 --Author: Connor Wojtak
 --Purpose: A utility used for playing and stopping sounds.
 
@@ -30,7 +30,7 @@ function find_sounds()
 	local JSONDirectory = love.filesystem.getDirectoryItems(SOUND_PATH)
 	local returnList = {}
 	for i, dir in ipairs(JSONDirectory) do
-		if love.filesystem.isFile(SOUND_PATH .. dir) == true then
+		if love.filesystem.getInfo(SOUND_PATH .. dir) ~= nil then
 			if string.find(dir, ".json") then
 				local content = love.filesystem.read(SOUND_PATH .. dir)
 				if not content then print("ERROR: No sound files loaded. If you are using sounds, this will cause problems.") return nil end
@@ -41,10 +41,10 @@ function find_sounds()
 	return returnList
 end
 
---Decodes JSON data returns the parameters. Returns: String, Integer, LOVE Sound
+--Decodes JSON data returns the parameters. Returns: String, LOVE Sound Source, Integer, Integer.
 function create_sound_para(data) 
 	local decoded_data = json.decode(data)
-	return decoded_data["name"], love.audio.newSource(RAW_SOUND_PATH .. decoded_data["sound"]), decoded_data["length"], decoded_data["flags"]
+	return decoded_data["name"], love.audio.newSource(RAW_SOUND_PATH .. decoded_data["sound"], "stream"), decoded_data["length"], decoded_data["flags"]
 end
 
 --SOUND CLASS

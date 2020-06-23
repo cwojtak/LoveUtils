@@ -1,5 +1,5 @@
 --level_helper.lua
---v1.10.14
+--v1.11.0
 --Author: Connor Wojtak
 --Purpose: A utility to load levels, their attributes, and their backgrounds, and turn them into
 --lists containing those attributes. This file also contains functions for reading the Level lists.
@@ -32,7 +32,7 @@ function find_levels()
 	local JSONDirectory = love.filesystem.getDirectoryItems(LEVEL_PATH)
 	local returnList = {}
 	for i, dir in ipairs(JSONDirectory) do
-		if love.filesystem.isFile(LEVEL_PATH .. dir) == true then
+		if love.filesystem.getInfo(LEVEL_PATH .. dir) ~= nil then
 			if string.find(dir, ".json") then
 			    local content = love.filesystem.read(LEVEL_PATH .. dir)
 				if not content then print("ERROR: No level files loaded. If you are using levels, this will cause problems.") return nil end

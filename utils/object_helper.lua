@@ -1,5 +1,5 @@
 --object_helper.lua
---v1.10.14
+--v1.11.0
 --Author: Connor Wojtak
 --Purpose: A utility to load and create objects, their attributes, and their sprites. This file also contains functions for reading attributes from Objects and EntityObjects.
 
@@ -33,7 +33,7 @@ function find_objects()
 	local JSONDirectory = love.filesystem.getDirectoryItems(OBJECT_PATH)
 	local returnList = {}
 	for i, dir in ipairs(JSONDirectory) do
-		if love.filesystem.isFile(OBJECT_PATH .. dir) == true then
+		if love.filesystem.getInfo(OBJECT_PATH .. dir) ~= nil then
 			if string.find(dir, ".json") then
 			    local content = love.filesystem.read(OBJECT_PATH .. dir)
 				if not content then print("ERROR: No object files loaded. If you are using objects, this will cause problems.") return nil end
@@ -303,8 +303,7 @@ function EntityObject.updateObjects()
 			if skip == false then
 				obj(entObj, innerobj, GLOBAL_ENTITYOBJECT_LIST)
 				skip = true
-			end
-			if skip == true then
+			else
 				skip = false
 			end
 			i = i + 1

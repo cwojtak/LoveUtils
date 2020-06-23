@@ -1,5 +1,5 @@
 --utils.lua
---v1.10.14
+--v1.11.0
 --Author: Connor Wojtak
 --Purpose: This utility provides a variety of different functions not relating to a certain class.
 
@@ -32,7 +32,7 @@ function Utils.loadPathSettings()
 	local content = nil
 	local JSONDirectory = love.filesystem.getDirectoryItems("utils/")
 	for i, dir in ipairs(JSONDirectory) do
-		if love.filesystem.isFile("utils/" .. dir) == true then
+		if love.filesystem.getInfo("utils/" .. dir) ~= nil then
 			if string.find(dir, ".json") then
 				content = love.filesystem.read("utils/" .. dir)
 				if content == nil then print("ERROR: Unable to find path file! Unable to load JSON files! Exiting!") os.exit(1) end

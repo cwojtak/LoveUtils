@@ -1,5 +1,5 @@
 --timer_helper.lua
---v1.10.14
+--v1.11.0
 --Author: Connor Wojtak
 --Purpose: A utility to allow for pausing of the application, while still rendering the application.
 
@@ -22,7 +22,7 @@ function Timer:start(w, f)
     return obj
 end
 
---Stops a timer, which can be restarted later.
+--Stops a timer, which can be restarted later. Returns: Nothing
 function Timer:stop()
 	self:setEnabled(false)
 end

@@ -1,5 +1,5 @@
 --main.lua
---v1.10.14
+--v1.11.0
 --Author: Connor Wojtak
 --Purpose: This file tests the utilities.
 
@@ -67,10 +67,8 @@ function love.keyreleased(key)
 		local entObjPosX = entObj:getPosX()
 		local entObjPosY = entObj:getPosY()
 		for i, obja in ipairs(obj_list) do
-			if obja:getPosX() ~= entObjPosX then
-				if obja:getPosY() ~= entObjPosY then
+			if (obja:getPosX() - entObjPosX ~= 0) or (obja:getPosY() - entObjPosY ~= 0) then
 					print("An object is in a different position than this object!")
-				end
 			end
 		end
 		end)

@@ -1,5 +1,5 @@
 --timer_helper.lua
---v1.11.0
+--v1.12.0
 --Author: Connor Wojtak
 --Purpose: A utility to allow for pausing of the application, while still rendering the application.
 

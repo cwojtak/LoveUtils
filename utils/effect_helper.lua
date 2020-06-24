@@ -1,5 +1,5 @@
 --effect_helper.lua
---v1.11.0
+--v1.12.0
 --Author: Connor Wojtak
 --Purpose: A utility to add animated effects to an EntityObject.
 
@@ -197,7 +197,7 @@ end
 --Called by love.draw() to update the effects. Returns: Nothing
 function EntityEffect.updateEffects()
 	GLOBAL_ENTITYEFFECT_INDEX = GLOBAL_ENTITYEFFECT_INDEX + 1
-	if GLOBAL_ENTITYEFFECT_INDEX == 75 then
+	if GLOBAL_ENTITYEFFECT_INDEX == 5 then
 		INC_IMAGE_STATE = true
 		GLOBAL_ENTITYEFFECT_INDEX = 0
 	end

@@ -1,5 +1,5 @@
 --utils.lua
---v1.11.0
+--v1.12.0
 --Author: Connor Wojtak
 --Purpose: This utility provides a variety of different functions not relating to a certain class.
 
@@ -25,6 +25,15 @@ function Utils.getTableLength(aTable)
   local count = 0
   for _ in pairs(aTable) do count = count + 1 end
   return count
+end
+
+--Completes various updates. The first argument is an integer value that the FPS should be limited to. Entering zero disables the FPS limiter. Returns: Nothing
+function Utils.update(limitFPS, dt)
+	if(limitFPS ~= 0) then
+		if dt < 1/limitFPS then
+			love.timer.sleep(1/limitFPS-dt)
+		end
+	end
 end
 
 --Loads all paths required to find objects, effects, levels, and sounds. Returns: Nothing

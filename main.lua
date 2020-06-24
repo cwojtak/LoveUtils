@@ -1,5 +1,5 @@
 --main.lua
---v1.11.0
+--v1.12.0
 --Author: Connor Wojtak
 --Purpose: This file tests the utilities.
 
@@ -29,6 +29,7 @@ end
 function love.update(dt)
 	Sound.updateSounds(dt)
 	Button.updateButtons()
+	Utils.update(60, dt)
 end
 
 function love.draw()
@@ -36,6 +37,7 @@ function love.draw()
 	Level.updateBackground()
 	EntityObject.updateObjects()
 	EntityEffect.updateEffects()
+	Drawable.updateDrawables()
 	collectgarbage() -- Saves delicious memory from being eaten.
 end
 
@@ -68,7 +70,7 @@ function love.keyreleased(key)
 		local entObjPosY = entObj:getPosY()
 		for i, obja in ipairs(obj_list) do
 			if (obja:getPosX() - entObjPosX ~= 0) or (obja:getPosY() - entObjPosY ~= 0) then
-					print("An object is in a different position than this object!")
+				print("An object is in a different position than this object!")
 			end
 		end
 		end)

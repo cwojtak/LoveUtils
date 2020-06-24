@@ -1,5 +1,5 @@
 --object_helper.lua
---v1.11.0
+--v1.12.0
 --Author: Connor Wojtak
 --Purpose: A utility to load and create objects, their attributes, and their sprites. This file also contains functions for reading attributes from Objects and EntityObjects.
 
@@ -16,7 +16,6 @@ EntityObject = {object=nil, speed=nil, direction=nil, posx=nil, posy=nil, flags=
 --Global Variables
 GLOBAL_OBJECT_LIST = {}
 GLOBAL_ENTITYOBJECT_LIST = {}
-GLOBAL_ENTITYOBJECT_INDEX = 0
 
 --Gets the length of the GLOBAL_OBJECT_LIST.
 function getLengthOfObjectList()
@@ -260,7 +259,8 @@ end
 
 --Called by love.draw() to update the EntityObjects. Returns: Nothing
 function EntityObject.updateObjects()
-	for i, entObj in ipairs(GLOBAL_ENTITYOBJECT_LIST) do
+	for i = Utils.getTableLength(GLOBAL_ENTITYOBJECT_LIST), 1, -1 do
+		local entObj = GLOBAL_ENTITYOBJECT_LIST[i]
 		local innerobj = entObj:getObject()
 		local size = innerobj:getSize()
 		if entObj:getPosY() - size >= WINDOW_HEIGHT or entObj:getPosX() - size >= WINDOW_WIDTH or entObj:getPosY() + size*2 <= 0 or entObj:getPosX() + size*2 <= 0 then --Keeps EntityObjects from eating delicious memory.
@@ -268,7 +268,7 @@ function EntityObject.updateObjects()
 				--The object is good, nothing needs to happen.
 			else
 				table.remove(GLOBAL_ENTITYOBJECT_LIST, i)
-				return
+				goto continue
 			end
 		end
 		
@@ -290,11 +290,6 @@ function EntityObject.updateObjects()
 			end
 		end
 		
-		if GLOBAL_ENTITYOBJECT_INDEX >= 100000 then
-			GLOBAL_ENTITYOBJECT_INDEX = 0
-		end
-		GLOBAL_ENTITYOBJECT_INDEX = GLOBAL_ENTITYOBJECT_INDEX + 1
-		
 		love.graphics.draw(innerobj:getImage(), entObj:getPosX(), entObj:getPosY(), 0, 1, 1, 0, 0, 0, 0)
 		
 		local skip = false
@@ -308,6 +303,7 @@ function EntityObject.updateObjects()
 			end
 			i = i + 1
 		end
+		::continue::
 	end
 end
 

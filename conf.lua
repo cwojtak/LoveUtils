@@ -1,5 +1,5 @@
 --conf.lua
---v1.11.0
+--v1.12.0
 --Author: Connor Wojtak
 --Purpose: This sets the LOVE configuration.
 

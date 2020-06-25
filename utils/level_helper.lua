@@ -1,5 +1,5 @@
 --level_helper.lua
---v1.12.0
+--v1.12.0/pre1.3-v2.0.0
 --Author: Connor Wojtak
 --Purpose: A utility to load levels, their attributes, and their backgrounds, and turn them into
 --lists containing those attributes. This file also contains functions for reading the Level lists.
@@ -15,12 +15,12 @@ Level = {}
 
 --Global Variables
 GLOBAL_LEVEL_LIST = {}
-GLOBAL_LEVEL_INDEX = 0
 LAST_LEVEL = nil
 UPDATE_BACKGROUND = false
 
 --Local Variables
 supressWarningMessages = false
+isScrolling = false
 
 --Gets the length of the GLOBAL_LEVEL_LIST.
 function getLengthOfLevelList()
@@ -111,6 +111,30 @@ function Level.updateBackground()
 		love.graphics.draw(love.graphics.newImage(LAST_LEVEL:getBackground()), 1, 1, 0, WINDOW_WIDTH/1920, WINDOW_HEIGHT/1080, 0, 0, 0, 0)
 	end
 end
+
+--[[----------UNDEFINED FUNCTIONS----------
+
+--Loads two without playing either's music and prepares to scroll. Ends the current level. Returns: Nothing
+function Level.beginScrollWith(levelOne, levelTwo)
+end
+
+--Scrolls the level at a certain speed. Returns: Nothing
+function Level.scroll(speed)
+end
+
+--Stops scrolling and stops all scrolling levels. Returns: Nothing
+function Level.stopScroll()
+end
+
+--Plays music for as long as the scrolling session continues. Returns: Nothing
+function Level.playScrollMusic()
+end
+
+--Stops the scrolling level music. Returns: Nothing
+function Level.stopScrollMusic()
+end
+
+----------END UNDEFINED FUNCTIONS------------]]
 
 --Finds a level with the level's name. Returns: Integer or Nil
 function Level.getLevelByName(levelname)

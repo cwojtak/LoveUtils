@@ -1,5 +1,5 @@
 --sound_helper.lua
---v1.12.0
+--v1.12.0/pre1.3-v2.0.0
 --Author: Connor Wojtak
 --Purpose: A utility used for playing and stopping sounds.
 
@@ -44,24 +44,24 @@ end
 --Decodes JSON data returns the parameters. Returns: String, LOVE Sound Source, Integer, Integer.
 function create_sound_para(data) 
 	local decoded_data = json.decode(data)
-	return decoded_data["name"], love.audio.newSource(RAW_SOUND_PATH .. decoded_data["sound"], "stream"), decoded_data["length"], decoded_data["flags"]
+	return decoded_data["name"], love.audio.newSource(RAW_SOUND_PATH .. decoded_data["sound"], decoded_data["audio_type"]), decoded_data["length"], decoded_data["flags"]
 end
 
 --SOUND CLASS
---Plays a sound. Returns: Nothing
+--Loads all of the sounds. Returns: Nothing
 function Sound.start()
 	local sounds = find_sounds()
 	if sounds == nil or sounds == {} then return end
 	for i, snd in ipairs(sounds) do
-		local name, sounda, length, flags = create_sound_para(snd)
-		local sound = Sound:new(name, sounda, length, flags)
+		local name, sounda, length, audio_type, flags = create_sound_para(snd)
+		local sound = Sound:new(name, sounda, length, audio_type, flags)
 		table.insert(GLOBAL_SOUND_LIST, sound)
 	end
 end
 
 --Creates a new Sound, which will eventually be stored in a global list. Returns: List
-function Sound:new(inname, insound, inlength, inflags)
-	local obj = {name = inname, sound = insound, length = tonumber(inlength), index = 0, flags = inflags, id = Utils.getTableLength(GLOBAL_SOUND_LIST)}
+function Sound:new(inname, insound, inlength, intype, inflags)
+	local obj = {name = inname, sound = insound, length = tonumber(inlength), index = 0, audio_type = intype, flags = inflags, id = Utils.getTableLength(GLOBAL_SOUND_LIST)}
 	setmetatable(obj, self)
     self.__index = self
     return obj
@@ -174,6 +174,11 @@ function Sound:getIndex()
 	return self["index"]
 end
 
+function Sound:getType()
+	if not self == Sound.getSoundByID(self:getID()) then print("WARNING: A Sound is not synced to the sound list! This may cause problems!") end
+	return self["audio_type"]
+end
+
 function Sound:getFlags()
 	if not self == Sound.getSoundByID(self:getID()) then print("WARNING: A Sound is not synced to the sound list! This may cause problems!") end
 	return self["flags"]
@@ -209,6 +214,13 @@ function Sound:setIndex(attr)
 	if obj == nil then return end
 	obj["index"] = attr
 	self["index"] = attr
+end
+
+function Sound:setType(attr)
+	local obj = Sound.getSoundByID(self:getID())
+	if obj == nil then return end
+	obj["audio_type"] = attr
+	self["audio_type"] = attr
 end
 
 function Sound:setFlags(attr)

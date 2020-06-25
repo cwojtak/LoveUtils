@@ -1,1 +1,1 @@
-{ "name":"ch1_intro_01" , "sound":"ch1_intro_01.ogg" , "length":"598" , "flags":"repeat" }
+{ "name":"ch1_intro_01" , "sound":"ch1_intro_01.ogg" , "length":"598" , "audio_type":"stream" , "flags":"repeat" }

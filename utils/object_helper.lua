@@ -1,5 +1,5 @@
 --object_helper.lua
---v1.12.0
+--v1.12.0/pre1.3-v2.0.0
 --Author: Connor Wojtak
 --Purpose: A utility to load and create objects, their attributes, and their sprites. This file also contains functions for reading attributes from Objects and EntityObjects.
 
@@ -10,7 +10,7 @@ local EFFECT_HELPER = require("utils/effect_helper")
 
 
 --Classes
-Object = {name=nil, image=nil, size=nil, effect=nil, flags=nil, id=nil, min_effect=nil, max_effect=nil}
+Object = {name=nil, image=nil, sizex=nil, sizey=nil, effect=nil, flags=nil, id=nil, min_effect=nil, max_effect=nil}
 EntityObject = {object=nil, speed=nil, direction=nil, posx=nil, posy=nil, flags=nil}
 
 --Global Variables
@@ -46,7 +46,7 @@ end
 --Decodes JSON data returns the parameters. Returns: String, LOVE Image
 function create_object_para(data) 
 	local decoded_data = json.decode(data)
-	return decoded_data["name"], love.graphics.newImage(OBJECT_IMAGE_PATH .. decoded_data["image"] .. ".jpg"), decoded_data["size"], decoded_data["effect"], decoded_data["flags"], decoded_data["min_effect"], decoded_data["max_effect"]
+	return decoded_data["name"], love.graphics.newImage(OBJECT_IMAGE_PATH .. decoded_data["image"] .. ".jpg"), decoded_data["sizex"], decoded_data["sizey"], decoded_data["effect"], decoded_data["flags"], decoded_data["min_effect"], decoded_data["max_effect"]
 end
 
 --OBJECT CLASS
@@ -63,10 +63,9 @@ function Object.start(method, decoded_data)
 		local objects = find_objects()
 		if objects == nil or objects == {} then return end
 		for i, obj in ipairs(objects) do
-			local inname, inimage, insize, ineffect, inflags, minffect, maxffect = create_object_para(obj)
+			local inname, inimage, insizex, insizey, ineffect, inflags, minffect, maxffect = create_object_para(obj)
 			local inid = Utils.getTableLength(GLOBAL_OBJECT_LIST)
-		
-			local obja = {name = inname, image = inimage, size=insize, id = inid, effect = ineffect, flags = inflags, mineffect = minffect, maxeffect = maxffect}
+			local obja = {name = inname, image = inimage, sizex = insizex, sizey = insizey, id = inid, effect = ineffect, flags = inflags, mineffect = minffect, maxeffect = maxffect}
 			local object = Object:new(obja)
 			table.insert(GLOBAL_OBJECT_LIST, object)
 		end
@@ -117,9 +116,14 @@ function Object:getImage()
 	return self["image"]
 end	
 	
-function Object:getSize()
+function Object:getSizeX()
 	if not self == Object.getObjectByID(self:getID()) then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
-	return self["size"]
+	return self["sizex"]
+end
+
+function Object:getSizeY()
+	if not self == Object.getObjectByID(self:getID()) then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
+	return self["sizey"]
 end
 
 function Object:getEffect()
@@ -165,11 +169,18 @@ function Object:setImage(attr)
 	self["image"] = attr
 end	
 	
-function Object:setSize(attr)
+function Object:setSizeX(attr)
 	local obj = Object.getObjectByID(self:getID())
 	if obj == nil then return end
-	obj["size"] = attr
-	self["size"] = attr
+	obj["sizex"] = attr
+	self["sizex"] = attr
+end
+
+function Object:setSizeY(attr)
+	local obj = Object.getObjectByID(self:getID())
+	if obj == nil then return end
+	obj["sizey"] = attr
+	self["sizey"] = attr
 end
 
 function Object:setEffect(attr)
@@ -262,8 +273,9 @@ function EntityObject.updateObjects()
 	for i = Utils.getTableLength(GLOBAL_ENTITYOBJECT_LIST), 1, -1 do
 		local entObj = GLOBAL_ENTITYOBJECT_LIST[i]
 		local innerobj = entObj:getObject()
-		local size = innerobj:getSize()
-		if entObj:getPosY() - size >= WINDOW_HEIGHT or entObj:getPosX() - size >= WINDOW_WIDTH or entObj:getPosY() + size*2 <= 0 or entObj:getPosX() + size*2 <= 0 then --Keeps EntityObjects from eating delicious memory.
+		local sizeX = innerobj:getSizeX()
+		local sizeY = innerobj:getSizeY()
+		if entObj:getPosY() - sizeY >= WINDOW_HEIGHT or entObj:getPosX() - sizeX >= WINDOW_WIDTH or entObj:getPosY() + sizeY*2 <= 0 or entObj:getPosX() + sizeX*2 <= 0 then --Keeps EntityObjects from eating delicious memory.
 			if innerobj:getFlags() == "offscreen" then 
 				--The object is good, nothing needs to happen.
 			else
@@ -272,23 +284,11 @@ function EntityObject.updateObjects()
 			end
 		end
 		
-		local newposx = nil
-		local newposy = nil
+		local velocityX = entObj:getSpeed() * math.cos(entObj:getDirection())
+		local velocityY = entObj:getSpeed() * math.sin(entObj:getDirection())
 		
-		if entObj:getSpeed() ~= 0 then
-			if entObj:getDirection() == "left" then
-				entObj:setPosX(entObj:getPosX() - entObj:getSpeed())
-			end
-			if entObj:getDirection() == "right" then
-				entObj:setPosX(entObj:getPosX() + entObj:getSpeed())
-			end
-			if entObj:getDirection() == "up" then
-				entObj:setPosY(entObj:getPosY() - entObj:getSpeed())
-			end
-			if entObj:getDirection() == "down" then
-				entObj:setPosY(entObj:getPosY() + entObj:getSpeed())
-			end
-		end
+		entObj:setPosX(entObj:getPosX() + velocityX)
+		entObj:setPosY(entObj:getPosY() - velocityY)
 		
 		love.graphics.draw(innerobj:getImage(), entObj:getPosX(), entObj:getPosY(), 0, 1, 1, 0, 0, 0, 0)
 		

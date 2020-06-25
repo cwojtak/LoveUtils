@@ -1,17 +1,22 @@
---button_helper.lua
---v1.12.0
+--menu_helper.lua
+--v1.12.0/pre1.3-v2.0.0
 --Author: Connor Wojtak
---Purpose: A utility to allow for the creation of buttons.
+--Purpose: A utility to allow for the creation of menus.
 
 --Imports
 local UTILS = require("utils/utils")
 
 
 --Classes
-Button = {beginx=nil, beginy=nil, endx=nil, endy=nil, clickfunc=nil, hoverfunc=nil}
+Menu = {beginx=nil, beginy=nil, endx=nil, endy=nil}
+Button = {parent=nil, beginx=nil, beginy=nil, endx=nil, endy=nil, clickfunc=nil, hoverfunc=nil}
+Partition = {parent=nil, beginx=nil, beginy=nil, endx=nil, endy=nil}
+Dropdown = {parent=nil, beginx=nil, beginy=nil, endx=nil, endy=nil}
+TextBox = {parent=nil, beginx=nil, beginy=nil, endx=nil, endy=nil}
 
 --Global Variables
-GLOBAL_BUTTON_LIST = {}
+GLOBAL_BUTTON_LIST = {} --Deprecated: will be incorporated into the GLOBAL_MENU_LIST
+GLOBAL_MENU_LIST = {}
 
 --Creates a new button. Returns: Button
 function Button:new(inbeginx, inbeginy, inendx, inendy, inclickfunc, inhoverfunc, innonhoverfunc)
@@ -36,7 +41,7 @@ function Button.destroyAllButtons()
 	GLOBAL_BUTTON_LIST = {}
 end
 
---Called by love.draw() to update the buttons. Returns: Nothing
+--Called by love.draw() to update the buttons. Returns: Nothing --Deprecated: WILL NOT BE CALLED DIRECTLY
 function Button.updateButtons()
 	local x, y = love.mouse.getPosition()
 	for i, b in ipairs(GLOBAL_BUTTON_LIST) do

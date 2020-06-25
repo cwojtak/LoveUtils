@@ -1,5 +1,5 @@
 --main.lua
---v1.12.0
+--v1.12.0/pre1.3-v2.0.0
 --Author: Connor Wojtak
 --Purpose: This file tests the utilities.
 
@@ -10,7 +10,7 @@ function love.load()
 	local LEVEL_HELPER = require("utils/level_helper")
 	local EFFECT_HELPER = require("utils/effect_helper")
 	local SOUND_HELPER = require("utils/sound_helper")
-	local BUTTON_HELPER = require("utils/button_helper")
+	local MENU_HELPER = require("utils/menu_helper")
 	local TIMER_HELPER = require("utils/timer_helper")
 	local DRAWABLE_HELPER = require("utils/drawable_helper")
 	local UTILS = require("utils/utils")
@@ -55,14 +55,14 @@ function love.keyreleased(key)
 	if key == "b" then
 		Button:new(10, 10, 100, 100, 
 		function(x, y, button, istouch)
-		EntityObject:new(Object.getObjectByName("kitty"), 0, 0, 9.8, "down", {})
+		EntityObject:new(Object.getObjectByName("kitty"), 0, 0, 9.8, math.rad(270), {})
 		end,
 		function(x, y, button, istouch)
-		EntityObject:new(Object.getObjectByName("kitty"), 0, 0, 1, "down", {})
+		EntityObject:new(Object.getObjectByName("kitty"), 0, 0, 1, math.rad(270), {})
 		end)
 	end
 	if key == "e" then --Creates a kitty going up.
-		local z = EntityObject:new(Object.getObjectByName("kitty"), 0, 0, 9.8, "right", {})
+		local z = EntityObject:new(Object.getObjectByName("kitty"), 0, 0, 9.8, math.rad(315), {})
 		z:applyDefaultEntityEffect() -- Applies the default EntityEffect.
 		
 		z:registerObjectEventHandler(function (entObj, obj, obj_list) -- Creates a new EventHandler.

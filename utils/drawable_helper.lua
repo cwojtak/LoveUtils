@@ -1,5 +1,5 @@
 --drawable_helper.lua
---v1.12.0/pre1.3-v2.0.0
+--v1.12.0/pre1.4-v2.0.0
 --Author: Connor Wojtak
 --Purpose: A utility to allow for the easy rendering of text and other objects.
 

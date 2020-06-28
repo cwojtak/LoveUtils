@@ -1,5 +1,5 @@
 --utils.lua
---v1.12.0/pre1.3-v2.0.0
+--v1.12.0/pre1.4-v2.0.0
 --Author: Connor Wojtak
 --Purpose: This utility provides a variety of different functions not relating to a certain class.
 
@@ -20,6 +20,7 @@ LEVEL_PATH = nil
 --Classes
 Utils = {}
 
+--UTILS CLASS
 --Gets the length of a table. Returns: Integer
 function Utils.getTableLength(aTable)
   local count = 0

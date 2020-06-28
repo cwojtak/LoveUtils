@@ -1,5 +1,5 @@
 --main.lua
---v1.12.0/pre1.3-v2.0.0
+--v1.12.0/pre1.4-v2.0.0
 --Author: Connor Wojtak
 --Purpose: This file tests the utilities.
 
@@ -28,7 +28,7 @@ end
 
 function love.update(dt)
 	Sound.updateSounds(dt)
-	Button.updateButtons()
+	Menu.updateMenus()
 	Utils.update(60, dt)
 end
 
@@ -42,7 +42,7 @@ function love.draw()
 end
 
 function love.mousepressed(x, y, button, istouch)
-	Button.onClickedHook(x, y, button, istouch)
+	Menu.updateMousePressed(x, y, button, istouch)
 end
 
 function love.mousereleased(x, y, button, istouch)
@@ -53,13 +53,16 @@ function love.keyreleased(key)
 		os.exit(0)
 	end
 	if key == "b" then
-		Button:new(10, 10, 100, 100, 
+		local menu = Menu:new("MainMenu")
+		local buttonone = Button:new("button1", 0, 0, 100, 100, 
 		function(x, y, button, istouch)
 		EntityObject:new(Object.getObjectByName("kitty"), 0, 0, 9.8, math.rad(270), {})
+		Menu.removeMenuByName("MainMenu")
 		end,
 		function(x, y, button, istouch)
 		EntityObject:new(Object.getObjectByName("kitty"), 0, 0, 1, math.rad(270), {})
 		end)
+		menu:addComponent(buttonone)
 	end
 	if key == "e" then --Creates a kitty going up.
 		local z = EntityObject:new(Object.getObjectByName("kitty"), 0, 0, 9.8, math.rad(315), {})

@@ -1,5 +1,5 @@
 --object_helper.lua
---v1.12.0/pre1.3-v2.0.0
+--v1.12.0/pre1.4-v2.0.0
 --Author: Connor Wojtak
 --Purpose: A utility to load and create objects, their attributes, and their sprites. This file also contains functions for reading attributes from Objects and EntityObjects.
 
@@ -16,6 +16,7 @@ EntityObject = {object=nil, speed=nil, direction=nil, posx=nil, posy=nil, flags=
 --Global Variables
 GLOBAL_OBJECT_LIST = {}
 GLOBAL_ENTITYOBJECT_LIST = {}
+ENTITYOBJECT_ID = -1
 
 --Gets the length of the GLOBAL_OBJECT_LIST.
 function getLengthOfObjectList()
@@ -79,11 +80,6 @@ function Object:new(obj)
     return obj
 end
 
---Deletes a loaded object. Returns: Nothing
-function Object.destroy(obj)
-	table.remove(GLOBAL_OBJECT_LIST, obj:getID())
-end
-
 --Finds an Object in the global list using a given name. Returns: Object or Nil
 function Object.getObjectByName(objectname)
 	for i, obj in ipairs(GLOBAL_OBJECT_LIST) do
@@ -107,42 +103,34 @@ end
 --OBJECT ATTRIBUTE GETTERS/SETTERS
 --Gets or sets an attribute of an Object. Returns: Attribute or Nothing
 function Object:getName()
-	if not self == Object.getObjectByID(self:getID()) then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
 	return self["name"]
 end
 	
 function Object:getImage()
-	if not self == Object.getObjectByID(self:getID()) then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
 	return self["image"]
 end	
 	
 function Object:getSizeX()
-	if not self == Object.getObjectByID(self:getID()) then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
 	return self["sizex"]
 end
 
 function Object:getSizeY()
-	if not self == Object.getObjectByID(self:getID()) then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
 	return self["sizey"]
 end
 
 function Object:getEffect()
-	if not self == Object.getObjectByID(self:getID()) then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
 	return self["effect"]
 end
 
 function Object:getMinEffect()
-	if not self == Object.getObjectByID(self:getID()) then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
 	return self["mineffect"]
 end
 
 function Object:getMaxEffect()
-	if not self == Object.getObjectByID(self:getID()) then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
 	return self["maxeffect"]
 end
 
 function Object:getFlags()
-	if not self == Object.getObjectByID(self:getID()) then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
 	return self["flags"]
 end
 
@@ -151,70 +139,42 @@ function Object:getID()
 end
 
 function Object:getCustomAttribute(attr)
-	if not self == Object.getObjectByID(self:getID()) then print("WARNING: An Object is not synced to the object list! This may cause problems!") end
 	return self[attr]
 end
 
 function Object:setName(attr)
-	local obj = Object.getObjectByID(self:getID())
-	if obj == nil then return end
-	obj["name"] = attr
 	self["name"] = attr
 end
 	
 function Object:setImage(attr)
-	local obj = Object.getObjectByID(self:getID())
-	if obj == nil then return end
-	obj["image"] = attr
 	self["image"] = attr
 end	
 	
 function Object:setSizeX(attr)
-	local obj = Object.getObjectByID(self:getID())
-	if obj == nil then return end
-	obj["sizex"] = attr
 	self["sizex"] = attr
 end
 
 function Object:setSizeY(attr)
-	local obj = Object.getObjectByID(self:getID())
-	if obj == nil then return end
-	obj["sizey"] = attr
 	self["sizey"] = attr
 end
 
 function Object:setEffect(attr)
-	local obj = Object.getObjectByID(self:getID())
-	if obj == nil then return end
-	obj["effect"] = attr
 	self["effect"] = attr
 end
 
 function Object:setMinEffect(attr)
-	local obj = Object.getObjectByID(self:getID())
-	if obj == nil then return end
-	obj["mineffect"] = attr
 	self["mineffect"] = attr
 end
 
 function Object:setMaxEffect(attr)
-	local obj = Object.getObjectByID(self:getID())
-	if obj == nil then return end
-	obj["maxeffect"] = attr
 	self["maxeffect"] = attr
 end
 
 function Object:setFlags(attr)
-	local obj = Object.getObjectByID(self:getID())
-	if obj == nil then return end
-	obj["flags"] = attr
 	self["flags"] = attr
 end
 
 function Object:setCustomAttribute(attr, val)
-	local obj = Object.getObjectByID(self:getID())
-	if obj == nil then return end
-	obj[attr] = val
 	self[attr] = val
 end
 
@@ -223,7 +183,8 @@ end
 function EntityObject:new(obj, begposx, begposy, begspeed, begdir, eventhandlersin)
 	local obj_effect = obj:getEffect()
 	local obj_flags = obj:getFlags()
-	local ID = Utils.getTableLength(GLOBAL_ENTITYOBJECT_LIST)
+	ENTITYOBJECT_ID = ENTITYOBJECT_ID + 1
+	local ID = ENTITYOBJECT_ID
 	
 	local eobj = {object = obj, speed = begspeed, direction = begdir, posx = begposx, posy = begposy, id = ID, eventhandler = eventhandlersin}
 	

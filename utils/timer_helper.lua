@@ -1,5 +1,5 @@
 --timer_helper.lua
---v1.12.0/pre1.3-v2.0.0
+--v1.12.0/pre1.4-v2.0.0
 --Author: Connor Wojtak
 --Purpose: A utility to allow for pausing of the application, while still rendering the application.
 
@@ -13,6 +13,7 @@ Timer = {}
 --Global Variables
 GLOBAL_TIMER_LIST = {}
 
+--TIMER CLASS
 --Creates a new timer. Returns: Timer
 function Timer:start(w, f)
 	local obj = {wait=w, func=f, enabled=true}
